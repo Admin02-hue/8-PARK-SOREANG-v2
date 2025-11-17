@@ -7,8 +7,7 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import { Toaster } from 'react-hot-toast'
-import { Navbar } from '@/components/navbar/Navbar'
+import LayoutClient from './layout-client'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -45,9 +44,7 @@ export default function RootLayout({
   return (
     <html lang="id">
       <body className={`${inter.variable} font-sans antialiased bg-white`}>
-        <Navbar />
-        <main className="pt-0">{children}</main>
-        <Toaster position="bottom-right" />
+        <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
   )
