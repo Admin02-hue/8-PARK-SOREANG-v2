@@ -1,0 +1,173 @@
+############################################################
+# ENTERPRISE-GRADE GITIGNORE
+# Next.js 14 • Supabase • Vercel • Docker • AI Assets
+# Ultra Secure — Recommended for Real Estate Production
+############################################################
+
+##############
+# DEPENDENCIES
+##############
+node_modules/
+.pnp/
+.pnp.*
+
+
+##############
+# YARN BERRY
+##############
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+
+##############
+# BUILD SYSTEM
+##############
+/.next/
+out/
+dist/
+build/
+.npm/
+.cache/
+.cache-loader/
+.eslintcache
+
+
+###################
+# SYSTEM GENERATED
+###################
+.DS_Store
+Thumbs.db
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+*.sublime-workspace
+*.sublime-project
+
+
+##################
+# ENV / SECRETS 🔥
+##################
+# Protect ALL secrets & keys (Supabase, Mapbox, Midtrans, SMTP, Vercel, API keys)
+.env
+.env.*
+*.local
+*.development
+*.production
+*.staging
+.envrc
+.supabase/*secret*
+
+
+###################
+# SUPABASE PROTECT
+###################
+# Prevent accidental upload of protected data
+supabase/.temp/
+supabase/.branches/
+supabase/migrations/.history/
+supabase/storage/backups/
+supabase/.env
+supabase/functions/*/secrets.*
+supabase/.metadata
+supabase/**/secrets.*
+
+
+###################
+# DOCKER / CONTAINERS
+###################
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+docker-data/
+var/
+tmp/
+*.tar
+*.img
+
+
+###############
+# TYPESCRIPT
+###############
+*.tsbuildinfo
+next-env.d.ts
+
+
+###############
+# TEST / COVERAGE
+###############
+coverage/
+cypress/screenshots/
+cypress/videos/
+.playwright/
+**/jest-cache/
+**/jest*/
+
+
+############################
+# EDITOR / IDE JUNK FILES
+############################
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+.idea/
+*.iml
+
+
+#########################
+# AI / MEDIA GENERATED 🔥
+#########################
+# Prevent giant assets eating repo size
+/public/temp-ai/
+/public/tmp/
+/public/raw-videos/
+/public/render-cache/
+/public/uploads-original/
+
+
+#########################
+# OS-SPECIFIC IGNORE
+#########################
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+
+#########################
+# PACKAGE MANAGERS
+#########################
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+.package-lock.json
+.yarn.lock   # optional if using pnpm or yarn berry
+
+
+#########################
+# VERSEL / DEPLOYMENT
+#########################
+.vercel/
+
+
+#########################
+# LOCK SAFE
+#########################
+*.pem
+*.key
+*.crt
+*.cert
+*.p12
+*.pfx
+*.der
+*.csr
+
+
+############################################################
+# END — Ultra Secure Global-Standard Gitignore
+############################################################
