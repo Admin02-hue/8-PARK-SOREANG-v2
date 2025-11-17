@@ -21,14 +21,15 @@ export const metadata = {
   },
 }
 
-export default function Home() {
+export default async function Home() {
   return (
     <main className="min-h-screen w-full bg-white">
       {/* Hero Section */}
       <HeroSection />
 
       {/* Highlight Units Section */}
-            <Suspense fallback={<div className="py-32 text-center text-gray-900 font-semibold">Loading units...</div>}>
+      <Suspense fallback={<div className="py-32 text-center text-gray-900 font-semibold">Loading units...</div>}>
+        {/* @ts-expect-error - Async Server Component */}
         <HighlightUnitsSection />
       </Suspense>
 
