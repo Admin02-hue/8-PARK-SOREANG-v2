@@ -29,7 +29,6 @@ export default async function Home() {
 
       {/* Highlight Units Section */}
       <Suspense fallback={<div className="py-32 text-center text-gray-900 font-semibold">Loading units...</div>}>
-        {/* @ts-expect-error - Async Server Component */}
         <HighlightUnitsSection />
       </Suspense>
 

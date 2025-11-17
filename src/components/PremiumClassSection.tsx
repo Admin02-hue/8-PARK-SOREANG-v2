@@ -1,5 +1,7 @@
 'use client'
 
+'use client'
+
 import { useRef } from 'react'
 import { motion, useScroll, useTransform, useInView } from 'framer-motion'
 import { CheckCircle2, Zap, Crown, Globe } from 'lucide-react'
