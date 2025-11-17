@@ -82,8 +82,18 @@ const nextConfig: NextConfig = {
 
   /* React Compiler */
   reactCompiler: true,
-}
 
-export default nextConfig
+  /* Webpack Configuration */
+  webpack: (config, { isServer }) => {
+    // Optimize webpack bundling
+    if (!isServer) {
+      config.optimization = {
+        ...config.optimization,
+        usedExports: true,
+      }
+    }
+    return config
+  },
+}
 
 
