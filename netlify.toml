@@ -1,26 +1,9 @@
 # Netlify Configuration for Next.js
 # ==================================
-# Konfigurasi untuk deploy Next.js ke Netlify dengan Next.js Runtime support
 
 [build]
-# Perintah build
 command = "npm run build"
-# Direktori publish hasil build
-publish = ".next"
-# Node version
-environment = { NODE_VERSION = "20" }
-
-# Konfigurasi untuk static assets
-[[redirects]]
-from = "/public/*"
-to = "/public/:splat"
-status = 200
-
-# Redirect untuk dynamic routes - handled by Next.js
-[[redirects]]
-from = "/*"
-to = "/404"
-status = 404
+publish = ".next/static"
 
 # Headers untuk performa dan keamanan
 [[headers]]
@@ -30,27 +13,18 @@ X-Content-Type-Options = "nosniff"
 X-Frame-Options = "SAMEORIGIN"
 X-XSS-Protection = "1; mode=block"
 Referrer-Policy = "strict-origin-when-cross-origin"
-Permissions-Policy = "camera=(), microphone=(), geolocation=()"
 
-# Headers untuk static assets - cache selamanya
+# Headers untuk static assets
 [[headers]]
 for = "/_next/static/*"
 [headers.values]
 Cache-Control = "public, max-age=31536000, immutable"
 
-# Headers untuk app assets
+# Headers untuk public assets
 [[headers]]
 for = "/public/*"
 [headers.values]
 Cache-Control = "public, max-age=31536000"
-
-# Context untuk preview deploys
-[context.deploy-preview]
-command = "npm run build"
-
-# Context untuk branch deploys
-[context.branch-deploy]
-command = "npm run build"
 
 # Plugins Netlify untuk Next.js
 [[plugins]]
