@@ -5,16 +5,10 @@
 [build]
 # Perintah build
 command = "npm run build"
-# Direktori publish hasil build - Next.js standalone output
-publish = ".next/static"
-# Fungsi akan handle dynamic routes
-functions = "api"
-# Environment untuk build
-environment = { NODE_ENV = "production", NODE_VERSION = "20" }
-
-[build.environment]
-# Environment variables untuk build
-NODE_ENV = "production"
+# Direktori publish hasil build
+publish = ".next"
+# Node version
+environment = { NODE_VERSION = "20" }
 
 # Konfigurasi untuk static assets
 [[redirects]]
@@ -54,23 +48,11 @@ Cache-Control = "public, max-age=31536000"
 [context.deploy-preview]
 command = "npm run build"
 
-[context.deploy-preview.environment]
-NODE_ENV = "development"
-
 # Context untuk branch deploys
 [context.branch-deploy]
 command = "npm run build"
 
-[context.branch-deploy.environment]
-NODE_ENV = "development"
-
 # Plugins Netlify untuk Next.js
 [[plugins]]
 package = "@netlify/plugin-nextjs"
-
-# Cron jobs untuk purge cache (optional)
-# Uncomment jika ingin auto-refresh production builds
-
-[cron]
-# Scheduled functions (jika ada, uncomment di sini)
 
