@@ -5,9 +5,9 @@
 
 import { createClient } from '@supabase/supabase-js'
 import type { Unit } from '@/types/database.types'
-import { NextResponse } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // Verifikasi method
     if (request.method !== 'POST') {

@@ -42,7 +42,7 @@ export function ContactCTASection() {
             <ul className="space-y-3 text-sm relative z-30 text-black">
               <li className="flex items-center gap-2">
                 <Phone className="h-4 w-4 text-black drop-shadow-lg shrink-0" />
-                <a href="tel:+628138331503" className="text-black font-medium drop-shadow-md hover:text-gray-900 transition-colors">
+                <a href="tel:+6281383315039" className="text-black font-medium drop-shadow-md hover:text-gray-900 transition-colors">
                   +62 (813) 8331 5039
                 </a>
               </li>

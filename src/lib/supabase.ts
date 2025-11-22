@@ -18,9 +18,16 @@ import type { Database } from '@/types/database.types'
 /**
  * Browser Client - Untuk Client Side Rendering
  * Menggunakan NEXT_PUBLIC_SUPABASE_ANON_KEY yang aman
+ * Singleton pattern untuk menghindari multiple instances
  */
-export function createBrowserSupabaseClient() {
+let browserClient: ReturnType<typeof createClient<Database>> | null = null
+
+export function createBrowserSupabaseClient(): ReturnType<typeof createClient<Database>> | null {
   'use client'
+  if (browserClient) {
+    return browserClient
+  }
+
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
@@ -30,7 +37,8 @@ export function createBrowserSupabaseClient() {
     )
   }
 
-  return createClient<Database>(supabaseUrl, supabaseAnonKey)
+  browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+  return browserClient
 }
 
 /**

@@ -14,7 +14,18 @@ import Link from 'next/link'
 
 async function getHighlightUnits(): Promise<Unit[]> {
   try {
+    // Check if environment variables are available
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
+      console.warn('[HighlightUnits] Supabase credentials not configured')
+      return []
+    }
+
     const supabase = createServerSupabaseClientSimple()
+    
+    if (!supabase) {
+      console.warn('[HighlightUnits] Gagal membuat Supabase client')
+      return []
+    }
 
     // Ambil 6 unit dengan status tersedia, urutkan by harga
     const { data: units, error } = await supabase
@@ -25,13 +36,20 @@ async function getHighlightUnits(): Promise<Unit[]> {
       .limit(6)
 
     if (error) {
-      console.error('Error fetching highlight units:', error)
+      console.warn('[HighlightUnits] Supabase query error:', error.message)
+      // Silently return empty array - database might not be ready yet
       return []
     }
 
-    return units || []
+    if (!units || units.length === 0) {
+      console.log('[HighlightUnits] No available units found')
+      return []
+    }
+
+    return units
   } catch (error) {
-    console.error('Error in getHighlightUnits:', error)
+    console.warn('[HighlightUnits] Error fetching units:', error instanceof Error ? error.message : 'Unknown error')
+    // Return empty array gracefully instead of crashing
     return []
   }
 }

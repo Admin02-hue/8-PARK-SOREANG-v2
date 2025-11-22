@@ -81,7 +81,7 @@ export default function LokasPage() {
                 <div key={index} className="flex items-start gap-4">
                   <div className="shrink-0">
                     <div className="flex items-center justify-center h-10 w-10 rounded-lg bg-gold-100">
-                      <item.icon className="h-6 w-6 text-gold-600" />
+                      <item.icon className="h-6 w-6 text-gray-900" />
                     </div>
                   </div>
                   <div>
@@ -151,10 +151,11 @@ export default function LokasPage() {
             Hubungi marketing kami untuk informasi lebih detail tentang lokasi dan unit tersedia
           </p>
           <a
-            href="https://wa.me/628138331503?text=Halo%2C%20saya%20tertarik%20dengan%20properti%20di%20Cluster%208%20Park%20Soreang.%20Mohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20terbaru%0A%E2%80%A2%20Harga%20%26%20simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya."
+            href="https://wa.me/6281383315039?text=Halo%2C%20saya%20tertarik%20dengan%20properti%20di%20Cluster%208%20Park%20Soreang.%20Mohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20terbaru%0A%E2%80%A2%20Harga%20%26%20simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya."
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-8 py-3 rounded-full bg-white text-black font-bold hover:shadow-lg transition-all duration-300"
+            className="inline-block px-8 py-3 rounded-full bg-white font-bold hover:shadow-lg transition-all duration-300"
+            style={{ color: '#1f2937' }}
           >
             Hubungi Marketing Sekarang
           </a>

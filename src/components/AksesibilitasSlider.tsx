@@ -41,7 +41,7 @@ export function AksesibilitasSlider() {
 
   return (
     <div className="w-full flex justify-center py-8 sm:py-12 bg-white">
-      <div className="w-full max-w-4xl px-4 sm:px-6">
+      <div className="w-full px-4 sm:px-6">
         {/* Section Header */}
         <div className="mb-8 sm:mb-10 text-center">
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
@@ -117,20 +117,27 @@ export function AksesibilitasSlider() {
           ))}
         </Swiper>
 
-        {/* Background Section - Simplified to Gradient */}
-        <div className="mt-12 sm:mt-16 w-full min-h-[450px] sm:min-h-[550px] lg:min-h-[620px] bg-linear-to-br from-slate-100 to-slate-200 relative rounded-lg"
-        >
+        {/* Background Section - with Image */}
+        <div className="mt-12 sm:mt-16 w-full relative rounded-lg overflow-hidden">
+          <div className="w-full aspect-4/3 sm:aspect-16/7 lg:aspect-21/7">
+            <Image
+              src="/image-new.jpg"
+              alt="Aksesibilitas Background"
+              fill
+              className="object-cover"
+              quality={85}
+            />
+          </div>
         </div>
 
-        {/* Video Grid Overlay - Positioned below section */}
-        <div className="relative w-full flex justify-center px-4 sm:px-6 -mt-48 sm:-mt-56 lg:-mt-64 pb-24 sm:pb-32">
-          <div className="w-full max-w-[1300px]">
-            <div className="rounded-lg overflow-hidden shadow-2xl hover:shadow-2xl transition-shadow duration-300 cursor-pointer bg-gray-800 aspect-video">
+        {/* Video Grid Overlay */}
+        <div className="relative w-full flex justify-center px-4 sm:px-6 -mt-20 sm:-mt-24 lg:-mt-28 pb-12 sm:pb-16 lg:pb-20">
+          <div className="w-full max-w-md sm:max-w-lg">
+            <div className="relative w-full overflow-hidden rounded-xl shadow-2xl bg-gray-900 aspect-video">
               <iframe
-                className="w-full h-full"
+                className="absolute inset-0 w-full h-full"
                 src="https://www.youtube.com/embed/CFN5sjGKt1E?controls=1&modestbranding=1&rel=0"
                 title="8 Park Soreang - Lokasi & Fasilitas"
-                frameBorder="0"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               />
@@ -146,5 +153,5 @@ export function AksesibilitasSlider() {
         </div>
       </div>
     </div>
-  );
+  )
 }

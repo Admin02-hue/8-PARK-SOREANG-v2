@@ -133,20 +133,27 @@ body {
   }
 }
 
-/* Select Dropdown Styling */
+/* Select Dropdown Styling - Glassmorphism */
 select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
-  background-position: right 0.5rem center;
-  background-repeat: no-repeat;
-  background-size: 1.5em 1.5em;
-  padding-right: 2.5rem;
+  font-family: inherit;
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
 }
 
 select option {
-  background: rgba(30, 30, 30, 0.95);
-  color: white;
-  padding: 0.5rem;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(20, 20, 20, 0.95) !important;
+  color: white !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+select option:hover {
+  background: linear-gradient(rgba(212, 175, 55, 0.3), rgba(212, 175, 55, 0.3)), rgba(20, 20, 20, 0.95) !important;
+}
+
+select:focus {
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6)) !important;
 }
 
 /* Selectors */
@@ -185,6 +192,129 @@ select {
     background: white;
     color: black;
   }
+}
+
+/* Ultra Premium Logo Loading Animations */
+@keyframes premiumRotate {
+  0% {
+    transform: rotate(0deg) scale(1);
+  }
+  50% {
+    transform: rotate(180deg) scale(1.05);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
+}
+
+@keyframes premiumGlow {
+  0% {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3)) drop-shadow(0 0 16px rgba(212, 175, 55, 0.1));
+    opacity: 0.9;
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6)) drop-shadow(0 0 32px rgba(212, 175, 55, 0.3));
+    opacity: 1;
+  }
+  100% {
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3)) drop-shadow(0 0 16px rgba(212, 175, 55, 0.1));
+    opacity: 0.9;
+  }
+}
+
+@keyframes premiumFloat {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes premiumShine {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+/* Ultra Premium Logo Class */
+.logo-premium-loading {
+  animation: premiumRotate 4s cubic-bezier(0.34, 1.56, 0.64, 1) infinite,
+            premiumGlow 2s ease-in-out infinite,
+            premiumFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.3));
+}
+
+/* Alternative smooth rotation with pulse */
+@keyframes smoothPremiumRotate {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes premiumPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+  }
+  50% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 16px rgba(212, 175, 55, 0.6));
+  }
+}
+
+.logo-smooth-premium {
+  animation: smoothPremiumRotate 6s linear infinite,
+            premiumPulse 2.5s ease-in-out infinite;
+}
+
+/* Even more premium with multi-layer glow */
+@keyframes ultraGlowPulse {
+  0% {
+    box-shadow: 
+      0 0 10px rgba(212, 175, 55, 0.2),
+      0 0 20px rgba(212, 175, 55, 0.1),
+      0 0 30px rgba(79, 70, 229, 0.05),
+      inset 0 0 10px rgba(212, 175, 55, 0.1);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px rgba(212, 175, 55, 0.4),
+      0 0 40px rgba(212, 175, 55, 0.2),
+      0 0 60px rgba(79, 70, 229, 0.1),
+      inset 0 0 20px rgba(212, 175, 55, 0.2);
+    filter: brightness(1.1);
+  }
+  100% {
+    box-shadow: 
+      0 0 10px rgba(212, 175, 55, 0.2),
+      0 0 20px rgba(212, 175, 55, 0.1),
+      0 0 30px rgba(79, 70, 229, 0.05),
+      inset 0 0 10px rgba(212, 175, 55, 0.1);
+    filter: brightness(1);
+  }
+}
+
+.logo-ultra-glow {
+  animation: smoothPremiumRotate 5s linear infinite,
+            ultraGlowPulse 3s ease-in-out infinite !important;
+  display: inline-block !important;
+}
+
+.logo-ultra-glow > div {
+  animation: inherit !important;
+}
+
+/* Inline style fallback untuk logo img */
+.logo-ultra-glow img {
+  animation: inherit !important;
 }
 
 

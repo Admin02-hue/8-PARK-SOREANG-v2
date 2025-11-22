@@ -33,17 +33,30 @@ export default function UnitsPage() {
     const fetchUnits = async () => {
       try {
         const supabase = createBrowserSupabaseClient()
+        if (!supabase) {
+          throw new Error('Supabase client tidak tersedia')
+        }
+        
+        console.log('Fetching units from Supabase...')
+        
         const { data, error } = await supabase
           .from('units')
           .select('*')
           .order('created_at', { ascending: false })
 
-        if (error) throw error
+        if (error) {
+          console.error('Supabase error:', error)
+          throw error
+        }
 
+        console.log('Units fetched:', data)
         setUnits(data || [])
         setFilteredUnits(data || [])
       } catch (error) {
         console.error('Error fetching units:', error)
+        // Set empty array so page doesn't get stuck
+        setUnits([])
+        setFilteredUnits([])
       } finally {
         setLoading(false)
       }
@@ -191,15 +204,22 @@ export default function UnitsPage() {
             {/* Sorting */}
             <div className="mb-6">
               <h3 className="font-semibold text-white mb-3">Urutkan</h3>
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
-                className="w-full px-3 py-2 border border-white/20 rounded-lg text-white bg-white/10 backdrop-blur"
-              >
-                <option value="price-asc">Harga Rendah ke Tinggi</option>
-                <option value="price-desc">Harga Tinggi ke Rendah</option>
-                <option value="luas">Luas Terbesar</option>
-              </select>
+              <div className="relative">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="w-full px-3 py-2 border border-white/30 rounded-lg text-white bg-white/15 backdrop-blur-md appearance-none pr-10 hover:bg-white/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-white/40"
+                >
+                  <option value="price-asc" className="bg-gray-800 text-white">Harga Terendah</option>
+                  <option value="price-desc" className="bg-gray-800 text-white">Harga Tertinggi</option>
+                  <option value="luas" className="bg-gray-800 text-white">Luas Terbesar</option>
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-white">
+                  <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                    <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Close button for mobile */}
@@ -251,7 +271,7 @@ export default function UnitsPage() {
                   exit={{ opacity: 0 }}
                   className="text-center py-16"
                 >
-                  <p className="text-gray-600 text-lg">
+                  <p className="text-white text-lg">
                     Tidak ada unit yang sesuai dengan filter Anda
                   </p>
                   <Button

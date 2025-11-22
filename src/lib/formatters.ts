@@ -166,7 +166,7 @@ export function formatDateID(date: string | Date): string {
 
 /**
  * Calculate simulasi KPR sederhana
- * Asumsi: bunga 5% per tahun, tenor 20 tahun
+ * Asumsi: bunga 4,30% per tahun, tenor 20 tahun
  */
 export function calculateKPRSimulation(
   price: number,
@@ -180,8 +180,8 @@ export function calculateKPRSimulation(
   const downPayment = (price * downPaymentPercent) / 100
   const loanAmount = price - downPayment
 
-  // Bunga per bulan = 5% per tahun / 12
-  const monthlyRate = 0.05 / 12
+  // Bunga per bulan = 4,30% per tahun / 12
+  const monthlyRate = 0.043 / 12
   const months = 20 * 12 // 20 tahun
 
   // Rumus: M = P * [r(1+r)^n] / [(1+r)^n - 1]

@@ -31,19 +31,40 @@ async function getUnitByCode(code: string): Promise<Unit | null> {
   try {
     const supabase = createServerSupabaseClientSimple()
 
-    const { data: unit, error } = await supabase
+    // Coba dengan uppercase terlebih dahulu
+    const result1 = await supabase
       .from('units')
       .select('*')
       .eq('code', code.toUpperCase())
       .single()
 
-    if (error || !unit) {
+    let unit = result1.data as Unit | null
+    let error = result1.error
+
+    // Jika tidak ditemukan, coba dengan exact case
+    if ((error || !unit) && code !== code.toUpperCase()) {
+      const result2 = await supabase
+        .from('units')
+        .select('*')
+        .eq('code', code)
+        .single()
+      unit = result2.data as Unit | null
+      error = result2.error
+    }
+
+    // Log untuk debugging
+    if (!unit) {
+      console.error(`⚠️ Unit tidak ditemukan untuk code: ${code}`)
+      if (error) {
+        console.error(`Error details:`, error.message)
+      }
       return null
     }
 
+    console.log(`✅ Unit ditemukan: ${unit.name} (${unit.code})`)
     return unit
-  } catch (error) {
-    console.error('Error fetching unit:', error)
+  } catch (err) {
+    console.error('Error fetching unit:', err instanceof Error ? err.message : String(err))
     return null
   }
 }
@@ -100,7 +121,7 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
   const otherUnits = await getOtherUnits(unit.id)
   const description = generateUnitDescription(unit)
   const descriptionParagraph = generateUnitDescriptionParagraph(unit)
-  const whatsappLink = `https://wa.me/628138331503?text=Halo%2C%20saya%20tertarik%20dengan%20unit%20${unit.code}%20%28${encodeURIComponent(unit.name)}%29%20dengan%20harga%20${formatRupiah(unit.harga)}.%0A%0AMohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20ini%0A%E2%80%A2%20Simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya.`
+  const whatsappLink = `https://wa.me/6281383315039?text=Halo%2C%20saya%20tertarik%20dengan%20unit%20${unit.code}%20%28${encodeURIComponent(unit.name)}%29%20dengan%20harga%20${formatRupiah(unit.harga)}.%0A%0AMohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20ini%0A%E2%80%A2%20Simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya.`
 
   return (
     <main 
@@ -230,7 +251,7 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
                     </Button>
                   </a>
 
-                  <a href="tel:+628138331503">
+                  <a href="tel:+6281383315039">
                     <Button variant="secondary" fullWidth size="lg">
                       <Phone className="h-5 w-5" />
                       Hubungi

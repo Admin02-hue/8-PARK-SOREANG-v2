@@ -5,35 +5,36 @@
  */
 
 import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
 import './globals.css'
 import LayoutClient from './layout-client'
 
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-})
-
 export const metadata: Metadata = {
-  title: '8 Park Soreang - Rumah Impian Anda di Bandung',
+  title: 'Cluster 8 Park Soreang — Perumahan Modern di Jantung Kabupaten Bandung',
   description:
-    'Cluster perumahan modern dengan lokasi strategis, fasilitas lengkap, dan harga terjangkau. Cicilan ringan tanpa DP.',
+    'Cluster 8 Park Soreang adalah perumahan modern di Bandung Selatan dengan akses 2 menit ke Tol Soroja. Dekat Alun-Alun Soreang, lingkungan eksklusif, unit premium dengan cicilan KPR ringan.',
   keywords: [
-    'rumah',
-    'soreang',
-    'bandung',
-    'cluster',
-    'perumahan',
-    'kpr',
-    'cicilan',
+    'cluster di bandung',
+    'cluster soreang',
+    'cluster bandung selatan',
+    'rumah cluster soreang',
+    'perumahan dekat tol soroja',
+    'cluster murah bandung',
+    'rumah baru soreang',
+    'cluster modern bandung selatan',
+    'rumah impian bandung',
+    'cicilan kpr bandung',
+    'perumahan eksklusif soreang'
   ],
-  authors: [{ name: '8 Park Soreang' }],
+  authors: [{ name: 'Cluster 8 Park Soreang' }],
   openGraph: {
-    title: '8 Park Soreang',
-    description: 'Rumah Impian Anda di Bandung',
+    title: 'Cluster 8 Park Soreang — Perumahan Modern di Jantung Kabupaten Bandung',
+    description: 'Cluster eksklusif di Jantung Kabupaten Bandung dengan akses cepat, cicilan KPR ringan, dan lingkungan premium.',
     type: 'website',
     locale: 'id_ID',
   },
+  alternates: {
+    canonical: 'https://8parksoreanq.com',
+  }
 }
 
 export default function RootLayout({
@@ -43,7 +44,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id">
-      <body className={`${inter.variable} font-sans antialiased bg-white`}>
+      <body className="font-sans antialiased bg-white">
         <LayoutClient>{children}</LayoutClient>
       </body>
     </html>

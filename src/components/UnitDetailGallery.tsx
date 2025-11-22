@@ -24,7 +24,17 @@ export function UnitDetailGallery({
   gallery,
   unitName,
 }: UnitDetailGalleryProps) {
-  const images = gallery && gallery.length > 0 ? gallery : thumbnail ? [thumbnail] : []
+  // Jika tidak ada gallery, gunakan thumbnail atau placeholder
+  const images = gallery && gallery.length > 0 
+    ? gallery 
+    : thumbnail 
+      ? [thumbnail]
+      : [
+          // Placeholder images jika tidak ada data
+          'https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=1200&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=1200&h=600&fit=crop',
+          'https://images.unsplash.com/photo-1493857671505-72967e2e2760?w=1200&h=600&fit=crop',
+        ]
   const [currentIndex, setCurrentIndex] = useState(0)
   const [isAutoPlay, setIsAutoPlay] = useState(true)
 

@@ -10,6 +10,8 @@ export interface Unit {
   id: string
   name: string // Contoh: "Tipe 65 – Blok A"
   code: string // Contoh: "A5", "B1"
+  blok: string // Blok unit
+  tipe: string // Tipe unit (65, 90, 120, dll)
   luas_bangunan: number // dalam m²
   luas_tanah: number // dalam m²
   harga: number // dalam Rupiah
@@ -25,6 +27,8 @@ export interface Unit {
 export interface UnitInsert {
   name: string
   code: string
+  blok: string
+  tipe: string
   luas_bangunan: number
   luas_tanah: number
   harga: number
@@ -96,6 +100,75 @@ export interface Sale {
   updated_at: string
 }
 
+export interface User {
+  id: string // FK to auth.users
+  email: string // UNIQUE
+  full_name: string | null
+  phone_number: string | null
+  role: 'admin' | 'manager' | 'staff' | 'user'
+  is_active: boolean
+  last_login: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface UserInsert {
+  id: string
+  email: string
+  full_name?: string | null
+  phone_number?: string | null
+  role?: 'admin' | 'manager' | 'staff' | 'user'
+  is_active?: boolean
+}
+
+export interface ChatRoom {
+  id: string  // UUID primary key
+  guest_id: string
+  created_at: string
+  updated_at: string
+  last_message: string | null
+  last_activity: string
+  is_closed: boolean
+  assigned_admin: string | null
+}
+
+export interface ChatMessage {
+  id: string
+  room_id: string
+  guest_id: string | null
+  sender: 'guest' | 'admin'
+  message: string
+  pending: boolean
+  is_read: boolean
+  created_at: string
+}
+
+export interface ChatMessageInsert {
+  room_id: string
+  guest_id?: string | null
+  sender: 'guest' | 'admin'
+  message: string
+  pending?: boolean
+  is_read?: boolean
+}
+
+export interface AdminStatus {
+  id: string
+  admin_id: string
+  status: 'online' | 'offline' | 'away'
+  last_activity: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ChatTyping {
+  id: string
+  room_id: string
+  sender: 'guest' | 'admin'
+  typing: boolean
+  created_at: string
+}
+
 // Untuk kompatibilitas dengan Supabase client generic
 export interface Database {
   public: {
@@ -105,6 +178,11 @@ export interface Database {
       promotions: { Row: Promotion; Insert: PromotionInsert; Update: Partial<PromotionInsert> }
       marketing_events: { Row: MarketingEvent; Insert: Omit<MarketingEvent, 'id' | 'created_at'>; Update: never }
       sales: { Row: Sale; Insert: Omit<Sale, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Sale, 'id' | 'created_at' | 'updated_at'>> }
+      users: { Row: User; Insert: UserInsert; Update: Partial<UserInsert> }
+      chat_rooms: { Row: ChatRoom; Insert: Omit<ChatRoom, 'id' | 'created_at' | 'updated_at' | 'last_activity'>; Update: Partial<Omit<ChatRoom, 'id' | 'created_at'>> }
+      chat_messages: { Row: ChatMessage; Insert: ChatMessageInsert; Update: Partial<ChatMessageInsert> }
+      admin_status: { Row: AdminStatus; Insert: Omit<AdminStatus, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<AdminStatus, 'id' | 'created_at'>> }
+      chat_typing: { Row: ChatTyping; Insert: Omit<ChatTyping, 'id' | 'created_at'>; Update: Partial<ChatTyping> }
     }
     Views: {}
     Functions: {}

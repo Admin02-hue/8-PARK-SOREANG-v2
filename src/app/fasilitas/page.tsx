@@ -205,13 +205,13 @@ export default function FasilitasPage() {
             Hubungi tim marketing kami untuk mendapatkan informasi lebih lengkap dan penawaran eksklusif
           </p>
           <motion.a
-            href="https://wa.me/628138331503?text=Halo%2C%20saya%20tertarik%20dengan%20properti%20di%20Cluster%208%20Park%20Soreang.%20Mohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20terbaru%0A%E2%80%A2%20Harga%20%26%20simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya."
+            href="https://wa.me/6281383315039?text=Halo%2C%20saya%20tertarik%20dengan%20properti%20di%20Cluster%208%20Park%20Soreang.%20Mohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20terbaru%0A%E2%80%A2%20Harga%20%26%20simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya."
             target="_blank"
             rel="noopener noreferrer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-block px-8 py-4 bg-linear-to-r from-gold-500 to-gold-600 text-white! font-bold rounded-full hover:shadow-lg hover:shadow-gold-500/50 transition-all duration-300"
-            style={{ color: '#ffffff' }}
+            className="inline-block px-8 py-4 bg-linear-to-r from-gold-500 to-gold-600 font-bold rounded-full hover:shadow-lg hover:shadow-gold-500/50 transition-all duration-300"
+            style={{ color: '#1f2937' }}
           >
             Hubungi Marketing
           </motion.a>
