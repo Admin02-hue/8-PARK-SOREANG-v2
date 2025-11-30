@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useSearchParams } from 'next/navigation'
 import { submitLead, trackMarketingEvent } from '@/lib/actions'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import type { Unit } from '@/types/database.types'
 import { Button } from '@/components/Button'
 import { Check, AlertCircle } from 'lucide-react'
@@ -32,7 +32,7 @@ export default function ContactPageContent() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const supabase = createBrowserSupabaseClient()
+        const supabase = getBrowserSupabaseClient()
         const { data, error } = await (supabase as any)
           .from('units')
           .select('id, code, name')

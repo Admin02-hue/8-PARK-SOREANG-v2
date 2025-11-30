@@ -1,12 +1,12 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { Button } from '@/components/Button'
 import UnitsPanel from '@/components/admin/UnitsPanel'
 import LeadsPanel from '@/components/admin/LeadsPanel'
-import PromotionsPanel from '@/components/admin/PromotionsPanel'
 import ReportsPanel from '@/components/admin/ReportsPanel'
 import SettingsPanel from '@/components/admin/SettingsPanel'
 import LiveChatPanel from '@/components/admin/LiveChatPanel'
@@ -20,7 +20,6 @@ import {
   X,
   Settings,
   FileText,
-  Megaphone,
   MessageCircle
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -37,7 +36,7 @@ interface DashboardStats {
   averagePrice: number
 }
 
-type PanelType = 'dashboard' | 'units' | 'leads' | 'promotions' | 'reports' | 'settings' | 'livechat'
+type PanelType = 'dashboard' | 'units' | 'leads' | 'reports' | 'settings' | 'livechat'
 
 export function AdminDashboardContent() {
   const router = useRouter()
@@ -58,7 +57,7 @@ export function AdminDashboardContent() {
 
     const checkAuth = async () => {
       try {
-        const supabase = createBrowserSupabaseClient()
+        const supabase = getBrowserSupabaseClient()
         const { data: sessionData } = await (supabase as any).auth.getSession()
         
         if (!sessionData.session) {
@@ -71,54 +70,39 @@ export function AdminDashboardContent() {
         // Fetch statistics
         const fetchStats = async () => {
           try {
-            const { count: unitCount } = await (supabase as any)
-              .from('units')
-              .select('id', { count: 'exact', head: true })
-
-            // Fetch leads dari API route (bypass RLS)
-            const leadsResponse = await fetch('/api/admin/leads')
-            const leadsPayload = await leadsResponse.json()
+            // Use API route to bypass RLS issues
+            const response = await fetch('/api/admin/reports')
+            if (!response.ok) throw new Error('Failed to fetch reports')
             
-            // Ensure leadsData is always an array
-            const leadsData = Array.isArray(leadsPayload) ? leadsPayload : []
-            const leadCount = leadsData.length
+            const data = await response.json()
+            const sales = data.sales || []
+            const leads = data.leads || []
+            const units = data.units || []
+            const allUnits = data.allUnits || []
 
-            const { data: availableUnits } = await (supabase as any)
-              .from('units')
-              .select('id', { count: 'exact' })
-              .eq('status', 'tersedia')
-
-            // Count new leads (status = 'baru') - safely handle filter on array
-            const newLeadsCount = Array.isArray(leadsData) 
-              ? leadsData.filter((l: any) => l.status === 'baru').length 
-              : 0
-
-            const { count: salesCount, data: salesData } = await (supabase as any)
-              .from('sales')
-              .select('id,sale_price', { count: 'exact' })
-              .eq('status', 'completed')
-
-            const { data: allUnits } = await (supabase as any)
-              .from('units')
-              .select('harga')
+            const unitCount = units.length
+            const leadCount = leads.length
+            const newLeadsCount = leads.filter((l: any) => l.status === 'baru').length
+            const availableUnits = units.filter((u: any) => u.status === 'tersedia').length
+            const salesCount = sales.length
 
             // Hitung Total Revenue
-            const totalRevenue = salesData?.reduce((sum: number, s: any) => sum + (s.sale_price || 0), 0) || 0
+            const totalRevenue = sales.reduce((sum: number, s: any) => sum + (s.sale_price || 0), 0)
 
             // Hitung Conversion Rate (sales / leads * 100)
             const conversionRate = leadCount > 0 ? (salesCount / leadCount) * 100 : 0
 
             // Hitung Harga Rata-rata
-            const totalPrice = allUnits?.reduce((sum: number, u: any) => sum + (u.harga || 0), 0) || 0
-            const averagePrice = allUnits && allUnits.length > 0 ? totalPrice / allUnits.length : 0
+            const totalPrice = allUnits.reduce((sum: number, u: any) => sum + (u.harga || 0), 0)
+            const averagePrice = allUnits.length > 0 ? totalPrice / allUnits.length : 0
 
             if (isMounted) {
               setStats({
-                totalUnits: unitCount || 0,
-                availableUnits: availableUnits?.length || 0,
+                totalUnits: unitCount,
+                availableUnits: availableUnits,
                 totalLeads: leadCount,
                 newLeads: newLeadsCount,
-                sales: salesCount || 0,
+                sales: salesCount,
                 totalRevenue: totalRevenue,
                 conversionRate: conversionRate,
                 averagePrice: averagePrice,
@@ -188,7 +172,7 @@ export function AdminDashboardContent() {
 
   const handleLogout = async () => {
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       await (supabase as any).auth.signOut()
       toast.success('Logout berhasil')
       router.push('/admin/login')
@@ -200,7 +184,7 @@ export function AdminDashboardContent() {
   if (loading) {
     return (
       <div className="min-h-screen bg-cover bg-center bg-fixed relative overflow-hidden" style={{
-        backgroundImage: 'url(/background-panel-admin.png)',
+        backgroundImage: 'url(/background-panel-admin-new.png)',
         backgroundAttachment: 'fixed'
       }}>
         {/* Background overlay */}
@@ -211,12 +195,12 @@ export function AdminDashboardContent() {
           {/* Glassmorphism Loading Card */}
           <div className="relative">
             {/* Animated gradient background */}
-            <div className="absolute inset-0 bg-linear-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-3xl blur-2xl animate-pulse"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 via-purple-400/20 to-pink-400/20 rounded-3xl blur-2xl animate-pulse"></div>
             
             {/* Main card */}
             <div className="relative bg-white/10 backdrop-blur-2xl border border-white/20 rounded-3xl p-12 w-full max-w-md shadow-2xl">
               {/* Animated top border accent */}
-              <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-linear-to-r from-transparent via-gold-400 to-transparent rounded-full blur-lg animate-pulse"></div>
+              <div className="absolute top-0 left-1/4 right-1/4 h-1 bg-gradient-to-r from-transparent via-gold-400 to-transparent rounded-full blur-lg animate-pulse"></div>
               
               <div className="flex flex-col items-center space-y-8">
                 {/* Premium Spinner */}
@@ -226,11 +210,15 @@ export function AdminDashboardContent() {
                     animation: 'smoothPremiumRotate 5s linear infinite, ultraGlowPulse 3s ease-in-out infinite',
                     display: 'inline-block'
                   }}>
-                    <div className="w-40 h-40 flex items-center justify-center">
-                      <img 
+                    <div className="w-40 h-40 flex items-center justify-center relative">
+                      <Image 
                         src="/logo-loading.png" 
-                        alt="Loading Logo" 
-                        className="w-full h-full object-contain"
+                        alt="Loading Logo"
+                        width={160}
+                        height={160}
+                        quality={80}
+                        priority
+                        style={{ objectFit: 'contain' }}
                       />
                     </div>
                   </div>
@@ -274,14 +262,13 @@ export function AdminDashboardContent() {
     { icon: Home, label: 'Kelola Unit', id: 'units', active: activePanel === 'units' },
     { icon: MessageCircle, label: 'Live Chat', id: 'livechat', active: activePanel === 'livechat' },
     { icon: Users, label: 'Lihat Leads', id: 'leads', active: activePanel === 'leads' },
-    { icon: Megaphone, label: 'Kelola Promo', id: 'promotions', active: activePanel === 'promotions' },
     { icon: FileText, label: 'Laporan', id: 'reports', active: activePanel === 'reports' },
     { icon: Settings, label: 'Pengaturan', id: 'settings', active: activePanel === 'settings' },
   ]
 
   return (
     <main className="min-h-screen bg-cover bg-center bg-fixed relative" style={{
-      backgroundImage: 'url(/background-panel-admin.png)',
+      backgroundImage: 'url(/background-panel-admin-new.png)',
       backgroundAttachment: 'fixed'
     }}>
       {/* Background overlay */}
@@ -343,7 +330,7 @@ export function AdminDashboardContent() {
               {/* Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Total Units */}
-                <div className="bg-linear-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/50 transition">
+                <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-blue-200 mb-1">Total Unit</p>
@@ -356,7 +343,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Available Units */}
-                <div className="bg-linear-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-500/50 transition">
+                <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-emerald-200 mb-1">Tersedia</p>
@@ -369,7 +356,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Total Leads */}
-                <div className="bg-linear-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition">
+                <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-purple-200 mb-1">Total Lead</p>
@@ -382,7 +369,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Sales */}
-                <div className="bg-linear-to-br from-gold-500/20 to-gold-600/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-6 hover:border-gold-500/50 transition">
+                <div className="bg-gradient-to-br from-gold-500/20 to-gold-600/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-6 hover:border-gold-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-gold-200 mb-1">Terjual</p>
@@ -398,7 +385,7 @@ export function AdminDashboardContent() {
               {/* Extended Stats Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* New Leads */}
-                <div className="bg-linear-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-md border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-500/50 transition">
+                <div className="bg-gradient-to-br from-yellow-500/20 to-yellow-600/20 backdrop-blur-md border border-yellow-500/30 rounded-xl p-6 hover:border-yellow-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-yellow-200 mb-1">Lead Baru</p>
@@ -411,7 +398,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Total Revenue */}
-                <div className="bg-linear-to-br from-rose-500/20 to-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-xl p-6 hover:border-rose-500/50 transition">
+                <div className="bg-gradient-to-br from-rose-500/20 to-rose-600/20 backdrop-blur-md border border-rose-500/30 rounded-xl p-6 hover:border-rose-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-rose-200 mb-1">Total Revenue</p>
@@ -424,7 +411,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Conversion Rate */}
-                <div className="bg-linear-to-br from-cyan-500/20 to-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-xl p-6 hover:border-cyan-500/50 transition">
+                <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-xl p-6 hover:border-cyan-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-cyan-200 mb-1">Conversion Rate</p>
@@ -437,7 +424,7 @@ export function AdminDashboardContent() {
                 </div>
 
                 {/* Average Price */}
-                <div className="bg-linear-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500/50 transition">
+                <div className="bg-gradient-to-br from-indigo-500/20 to-indigo-600/20 backdrop-blur-md border border-indigo-500/30 rounded-xl p-6 hover:border-indigo-500/50 transition">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-indigo-200 mb-1">Harga Rata-rata</p>
@@ -454,7 +441,7 @@ export function AdminDashboardContent() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                 <button
                   onClick={() => setActivePanel('units')}
-                  className="bg-linear-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/50 transition text-left group"
+                  className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6 hover:border-blue-500/50 transition text-left group"
                 >
                   <Home className="w-8 h-8 text-blue-400 mb-3 group-hover:scale-110 transition" />
                   <h3 className="font-semibold text-white mb-1">Kelola Unit</h3>
@@ -463,7 +450,7 @@ export function AdminDashboardContent() {
 
                 <button
                   onClick={() => setActivePanel('livechat')}
-                  className="bg-linear-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-500/50 transition text-left group"
+                  className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6 hover:border-emerald-500/50 transition text-left group"
                 >
                   <MessageCircle className="w-8 h-8 text-emerald-400 mb-3 group-hover:scale-110 transition" />
                   <h3 className="font-semibold text-white mb-1">Live Chat</h3>
@@ -472,28 +459,19 @@ export function AdminDashboardContent() {
 
                 <button
                   onClick={() => setActivePanel('leads')}
-                  className="bg-linear-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition text-left group"
+                  className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition text-left group"
                 >
                   <Users className="w-8 h-8 text-purple-400 mb-3 group-hover:scale-110 transition" />
                   <h3 className="font-semibold text-white mb-1">Lihat Leads</h3>
                   <p className="text-sm text-gray-300">Kelola data calon pembeli</p>
                 </button>
-
-                <button
-                  onClick={() => setActivePanel('promotions')}
-                  className="bg-linear-to-br from-gold-500/20 to-gold-600/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-6 hover:border-gold-500/50 transition text-left group"
-                >
-                  <Megaphone className="w-8 h-8 text-gold-400 mb-3 group-hover:scale-110 transition" />
-                  <h3 className="font-semibold text-white mb-1">Kelola Promo</h3>
-                  <p className="text-sm text-gray-300">Buat dan kelola promosi</p>
-                </button>
               </div>
 
               {/* Welcome Section */}
-              <div className="bg-linear-to-r from-gold-500/20 to-yellow-500/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-8">
+              <div className="bg-gradient-to-r from-gold-500/20 to-yellow-500/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-8">
                 <h3 className="text-2xl font-bold text-white mb-2">Selamat Datang! 👋</h3>
                 <p className="text-gray-300 mb-4">
-                  Gunakan dashboard ini untuk mengelola unit properti, leads calon pembeli, dan promosi.
+                  Gunakan dashboard ini untuk mengelola unit properti dan leads calon pembeli.
                   Semua data tersinkronisasi real-time dengan sistem kami.
                 </p>
                 <div className="flex flex-wrap gap-3">
@@ -523,9 +501,6 @@ export function AdminDashboardContent() {
 
           {/* Leads Panel */}
           {activePanel === 'leads' && <LeadsPanel />}
-
-          {/* Promotions Panel */}
-          {activePanel === 'promotions' && <PromotionsPanel />}
 
           {/* Reports Panel */}
           {activePanel === 'reports' && <ReportsPanel />}

@@ -124,7 +124,7 @@ export function PremiumClassSection() {
             className="text-5xl md:text-6xl font-bold text-white mb-6 leading-tight"
           >
             Investasi{' '}
-            <span className="bg-linear-to-r from-gold-400 via-gold-300 to-emerald-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-gold-400 via-gold-300 to-emerald-400 bg-clip-text text-transparent">
               Premium
             </span>
             {' '}untuk Masa Depan
@@ -167,10 +167,10 @@ export function PremiumClassSection() {
                   variants={cardHoverVariants}
                   initial="initial"
                   whileHover="hover"
-                  className="group relative h-full p-6 rounded-xl border border-gold-500/20 bg-linear-to-br from-gold-500/5 via-slate-800/50 to-slate-900/50 backdrop-blur-sm transition-all duration-300 hover:border-gold-400/50 hover:shadow-[0_0_30px_rgba(219,179,112,0.2)]"
+                  className="group relative h-full p-6 rounded-xl border border-gold-500/20 bg-gradient-to-br from-gold-500/5 via-slate-800/50 to-slate-900/50 backdrop-blur-sm transition-all duration-300 hover:border-gold-400/50 hover:shadow-[0_0_30px_rgba(219,179,112,0.2)]"
                 >
                   {/* Icon dengan glow effect */}
-                  <div className="mb-4 inline-flex p-3 rounded-lg bg-linear-to-br from-gold-500/20 to-emerald-500/20 group-hover:from-gold-500/30 group-hover:to-emerald-500/30 transition-all duration-300">
+                  <div className="mb-4 inline-flex p-3 rounded-lg bg-gradient-to-br from-gold-500/20 to-emerald-500/20 group-hover:from-gold-500/30 group-hover:to-emerald-500/30 transition-all duration-300">
                     <Icon className="w-6 h-6 text-gold-400 group-hover:text-emerald-400 transition-colors" />
                   </div>
 
@@ -183,7 +183,7 @@ export function PremiumClassSection() {
                   </p>
 
                   {/* Decorative line */}
-                  <div className="absolute inset-x-0 bottom-0 h-px bg-linear-to-r from-transparent via-gold-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-gold-500/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </motion.div>
               </motion.div>
             )
@@ -225,12 +225,12 @@ export function PremiumClassSection() {
                 }),
               }}
               whileHover={{ scale: 1.05, y: -5 }}
-              className="relative p-8 rounded-2xl border border-gold-500/30 bg-linear-to-br from-gold-500/10 via-transparent to-emerald-500/10 backdrop-blur-sm hover:border-gold-400/50 transition-all duration-300 group"
+              className="relative p-8 rounded-2xl border border-gold-500/30 bg-gradient-to-br from-gold-500/10 via-transparent to-emerald-500/10 backdrop-blur-sm hover:border-gold-400/50 transition-all duration-300 group"
             >
-              <div className="absolute inset-0 rounded-2xl bg-linear-to-r from-gold-500/0 via-gold-500/0 to-emerald-500/0 group-hover:from-gold-500/5 group-hover:via-gold-500/5 group-hover:to-emerald-500/5 transition-all duration-300" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-gold-500/0 via-gold-500/0 to-emerald-500/0 group-hover:from-gold-500/5 group-hover:via-gold-500/5 group-hover:to-emerald-500/5 transition-all duration-300" />
 
               <div className="relative text-center">
-                <p className="text-4xl md:text-5xl font-bold bg-linear-to-r from-gold-400 to-emerald-400 bg-clip-text text-transparent mb-2">
+                <p className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-gold-400 to-emerald-400 bg-clip-text text-transparent mb-2">
                   {stat.value}
                 </p>
                 <p className="text-slate-400 text-sm uppercase tracking-wider">

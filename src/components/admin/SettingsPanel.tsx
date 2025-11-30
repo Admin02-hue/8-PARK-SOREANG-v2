@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { Button } from '@/components/Button'
 import { LogOut, Eye, EyeOff, Lock, User } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -44,7 +44,7 @@ export default function SettingsPanel() {
       if (isMounted) await fetchProfile()
 
       try {
-        const supabase = createBrowserSupabaseClient()
+        const supabase = getBrowserSupabaseClient()
         if (!supabase) return
 
         // Get current user ID for subscription
@@ -65,7 +65,7 @@ export default function SettingsPanel() {
                 }
               }
             )
-            .subscribe((status: string) => {
+            .subscribe((status: any) => {
               if (status === 'SUBSCRIBED') {
                 console.log('✅ Settings realtime subscription active')
               } else if (status === 'CHANNEL_ERROR') {
@@ -90,7 +90,7 @@ export default function SettingsPanel() {
 
   const fetchProfile = async () => {
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       if (!supabase) {
         throw new Error('Supabase client tidak tersedia')
       }
@@ -191,7 +191,7 @@ export default function SettingsPanel() {
     }
 
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       const { error } = await (supabase as any).auth.updateUser({
         password: passwordForm.newPassword,
       })
@@ -216,7 +216,7 @@ export default function SettingsPanel() {
 
   const handleLogout = async () => {
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       const { error } = await (supabase as any).auth.signOut()
 
       if (error) throw error

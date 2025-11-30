@@ -60,23 +60,6 @@ export interface LeadInsert {
   status: 'baru' | 'contacted' | 'interested' | 'closed'
 }
 
-export interface Promotion {
-  id: string
-  title: string // Contoh: "RUMAH TANPA DP"
-  description: string
-  terms: string[] // Array syarat dan ketentuan
-  is_active: boolean
-  created_at: string
-  updated_at: string
-}
-
-export interface PromotionInsert {
-  title: string
-  description: string
-  terms: string[]
-  is_active: boolean
-}
-
 export interface MarketingEvent {
   id: string
   event_type: 'whatsapp_click' | 'call_click' | 'lead_submit' | 'unit_view' // Tipe event
@@ -175,7 +158,6 @@ export interface Database {
     Tables: {
       units: { Row: Unit; Insert: UnitInsert; Update: Partial<UnitInsert> }
       leads: { Row: Lead; Insert: LeadInsert; Update: Partial<LeadInsert> }
-      promotions: { Row: Promotion; Insert: PromotionInsert; Update: Partial<PromotionInsert> }
       marketing_events: { Row: MarketingEvent; Insert: Omit<MarketingEvent, 'id' | 'created_at'>; Update: never }
       sales: { Row: Sale; Insert: Omit<Sale, 'id' | 'created_at' | 'updated_at'>; Update: Partial<Omit<Sale, 'id' | 'created_at' | 'updated_at'>> }
       users: { Row: User; Insert: UserInsert; Update: Partial<UserInsert> }

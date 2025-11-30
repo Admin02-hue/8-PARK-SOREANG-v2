@@ -68,7 +68,7 @@ export function ExpandableFAQSection() {
                 {/* Question Button */}
                 <button
                   onClick={() => toggleFAQ(item.id)}
-                  className="w-full px-6 py-4 flex items-center justify-between bg-linear-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 transition-colors"
+                  className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 transition-colors"
                 >
                   <h3 className="text-lg font-semibold text-gray-900 text-left">
                     {item.question}

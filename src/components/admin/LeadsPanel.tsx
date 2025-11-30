@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { MessageCircle, Search, Filter } from 'lucide-react'
 import toast from 'react-hot-toast'
 import type { Database } from '@/types/database.types'
@@ -21,7 +21,7 @@ export default function LeadsPanel() {
     const init = async () => {
       if (isMounted) await fetchLeads()
       
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       const sub = (supabase as any)
         .channel('leads_' + Math.random())
         .on('postgres_changes', { event: '*', schema: 'public', table: 'leads' }, () => {

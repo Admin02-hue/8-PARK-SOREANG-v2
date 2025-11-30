@@ -33,9 +33,9 @@ export function Navbar() {
     <>
       {/* NAVBAR FIXED */}
       <motion.nav
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.5, ease: 'easeOut' }}
+        initial={{ y: -100, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
         className="fixed top-0 left-0 right-0 z-999 px-4 sm:px-6 lg:px-8 py-2"
       >
         <motion.div
@@ -44,7 +44,7 @@ export function Navbar() {
             paddingTop: isScrolled ? 4 : 8,
             paddingBottom: isScrolled ? 4 : 8,
           }}
-          transition={{ duration: 0.25, ease: 'easeInOut' }}
+          transition={{ duration: 0.4, ease: 'easeInOut' }}
           className="max-w-7xl mx-auto rounded-2xl bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl flex items-center justify-between px-6"
         >
           {/* Logo */}
@@ -70,7 +70,7 @@ export function Navbar() {
             href="https://wa.me/6281383315039?text=Halo%2C%20saya%20tertarik%20dengan%20properti%20di%20Cluster%208%20Park%20Soreang.%20Mohon%20informasi%20terkait%3A%0A%E2%80%A2%20Ketersediaan%20unit%20terbaru%0A%E2%80%A2%20Harga%20%26%20simulasi%20KPR%0A%E2%80%A2%20Promo%20%26%20bonus%20yang%20sedang%20berlaku%0A%E2%80%A2%20Jadwal%20survei%20lokasi%0A%0ATerima%20kasih%20atas%20bantuannya."
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden lg:block px-6 py-2 rounded-full bg-linear-to-r from-gold-500 to-gold-600 font-bold text-sm text-black!"
+            className="hidden lg:block px-6 py-2 rounded-full bg-gradient-to-r from-gold-500 to-gold-600 font-bold text-sm text-black!"
           >
             Hubungi Marketing
           </a>

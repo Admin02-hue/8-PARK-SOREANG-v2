@@ -21,7 +21,7 @@ export default function LokasPage() {
   return (
     <main className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="py-20 bg-linear-to-br from-slate-50 to-slate-100">
+      <section className="py-20 bg-gradient-to-br from-slate-50 to-slate-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
@@ -142,7 +142,7 @@ export default function LokasPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-linear-to-r from-gold-500 to-gold-600">
+      <section className="py-20 bg-gradient-to-r from-gold-500 to-gold-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Tertarik dengan Lokasi Kami?

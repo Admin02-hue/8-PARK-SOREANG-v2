@@ -3,7 +3,7 @@
  * ========================
  * 
  * File ini menyediakan instance Supabase client untuk berbagai konteks:
- * - Browser (client-side rendering)
+ * - Browser (client-side rendering) - SINGLETON
  * - Server (Server Actions dan Route Handlers)
  * 
  * ATURAN KEAMANAN PENTING:
@@ -16,14 +16,13 @@ import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/database.types'
 
 /**
- * Browser Client - Untuk Client Side Rendering
+ * Browser Client - SINGLETON Pattern
  * Menggunakan NEXT_PUBLIC_SUPABASE_ANON_KEY yang aman
- * Singleton pattern untuk menghindari multiple instances
+ * Hanya di-initialize SEKALI saja untuk menghindari multiple GoTrueClient instances
  */
 let browserClient: ReturnType<typeof createClient<Database>> | null = null
 
-export function createBrowserSupabaseClient(): ReturnType<typeof createClient<Database>> | null {
-  'use client'
+function initBrowserClient() {
   if (browserClient) {
     return browserClient
   }
@@ -37,8 +36,39 @@ export function createBrowserSupabaseClient(): ReturnType<typeof createClient<Da
     )
   }
 
-  browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey)
+  browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+    },
+  })
+
   return browserClient
+}
+
+/**
+ * Export lazy singleton - gunakan function ini di client components
+ * Guaranteed hanya create 1 instance sepanjang app lifecycle
+ */
+export function createBrowserSupabaseClient(): ReturnType<typeof createClient<Database>> {
+  const client = initBrowserClient()
+  if (!client) {
+    throw new Error('Failed to initialize Supabase browser client')
+  }
+  return client
+}
+
+/**
+ * Export direct singleton reference - untuk direct imports
+ * Dengan non-null assertion karena guaranteed ter-initialize
+ */
+export function getBrowserSupabaseClient(): ReturnType<typeof createClient<Database>> {
+  const client = initBrowserClient()
+  if (!client) {
+    throw new Error('Failed to initialize Supabase browser client')
+  }
+  return client
 }
 
 /**
@@ -67,4 +97,3 @@ export function createServerSupabaseClientSimple() {
 
   return createClient<Database>(supabaseUrl, supabaseServiceRoleKey)
 }
-

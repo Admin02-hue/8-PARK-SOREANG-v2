@@ -1,9 +1,19 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getBrowserSupabaseClient } from './supabase'
+import { isValidUUID } from './uuid-utils'
 import type { Database } from '@/types/database.types'
 
-const supabase = createClientComponentClient<Database>()
+// Logging - disabled for clean production console
+const log = (...args: any[]) => {}  // Info logs disabled
+const logError = (...args: any[]) => {}  // Error logs disabled
+
+/**
+ * Helper: Get Supabase client (lazy-loaded)
+ */
+function getClient(): any {
+  return getBrowserSupabaseClient()
+}
 
 /**
  * Helper: Format error object untuk logging
@@ -56,7 +66,7 @@ export const ChatService = {
   async getRoom(guestId: string) {
     try {
       // Cek room yang sudah ada
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('chat_rooms')
         .select('*')
         .eq('guest_id', guestId)
@@ -64,7 +74,7 @@ export const ChatService = {
         .single()
 
       if (data) {
-        console.log('[ChatService] Room ditemukan:', data.id)
+        log('[ChatService] Room ditemukan:', data.id)
         // Return data as-is, primary key adalah 'id'
         return data
       }
@@ -72,9 +82,9 @@ export const ChatService = {
       // Room tidak ada, create baru
       if (error && error.code === 'PGRST116') {
         // PGRST116 = no rows returned, ini normal untuk guest baru
-        console.log('[ChatService] Room baru akan dibuat untuk guest:', guestId)
+        log('[ChatService] Room baru akan dibuat untuk guest:', guestId)
 
-        const { data: newRoom, error: createError } = await supabase
+        const { data: newRoom, error: createError } = await getClient()
           .from('chat_rooms')
           .insert({
             guest_id: guestId,
@@ -85,11 +95,11 @@ export const ChatService = {
 
         if (createError) {
           const errorMsg = formatError(createError)
-          console.error('[ChatService] Error membuat room:', errorMsg)
+          logError('[ChatService] Error membuat room:', errorMsg)
           throw createError
         }
 
-        console.log('[ChatService] Room baru dibuat:', newRoom.id)
+        log('[ChatService] Room baru dibuat:', newRoom.id)
         // Return data as-is
         return newRoom
       }
@@ -97,12 +107,12 @@ export const ChatService = {
       // Error lainnya
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error fetch room:', errorMsg)
+        logError('[ChatService] Error fetch room:', errorMsg)
         throw error
       }
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] getRoom error:', errorMsg)
+      logError('[ChatService] getRoom error:', errorMsg)
       throw error
     }
   },
@@ -122,19 +132,19 @@ export const ChatService = {
     try {
       if (!roomId || !text || !sender) {
         const errMsg = 'Missing required fields: roomId, text, or sender'
-        console.error('[ChatService] Validation error:', errMsg)
+        logError('[ChatService] Validation error:', errMsg)
         return { data: null, error: errMsg }
       }
 
       const trimmedText = text.trim()
       if (!trimmedText) {
         const errMsg = 'Message cannot be empty'
-        console.error('[ChatService] Validation error:', errMsg)
+        logError('[ChatService] Validation error:', errMsg)
         return { data: null, error: errMsg }
       }
 
       // Insert message dengan created_at dari server (now()) dan pending: false
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('chat_messages')
         .insert({
           room_id: roomId,
@@ -148,11 +158,11 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error sending message:', errorMsg)
+        logError('[ChatService] Error sending message:', errorMsg)
         return { data: null, error: errorMsg }
       }
 
-      console.log('[ChatService] Message sent:', data.id)
+      log('[ChatService] Message sent:', data.id)
 
       // Room's updated_at akan di-update otomatis oleh trigger database
       // Jadi tidak perlu update manual dari client
@@ -160,7 +170,7 @@ export const ChatService = {
       return { data, error: null }
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] sendMessage exception:', errorMsg)
+      logError('[ChatService] sendMessage exception:', errorMsg)
       return { data: null, error: errorMsg }
     }
   },
@@ -173,21 +183,21 @@ export const ChatService = {
     try {
       if (!messageId) return
 
-      const { error } = await supabase
+      const { error } = await getClient()
         .from('chat_messages')
         .update({ pending: false })
         .eq('id', messageId)
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error marking delivered:', errorMsg)
+        logError('[ChatService] Error marking delivered:', errorMsg)
         return
       }
 
-      console.log('[ChatService] Message marked delivered:', messageId)
+      log('[ChatService] Message marked delivered:', messageId)
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] markDelivered error:', errorMsg)
+      logError('[ChatService] markDelivered error:', errorMsg)
     }
   },
 
@@ -200,7 +210,7 @@ export const ChatService = {
     try {
       if (!roomId) return
 
-      const { error } = await supabase
+      const { error } = await getClient()
         .from('chat_messages')
         .update({
           is_read: true,
@@ -210,27 +220,36 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error marking read:', errorMsg)
+        logError('[ChatService] Error marking read:', errorMsg)
         return
       }
 
-      console.log('[ChatService] Messages marked as read for room:', roomId)
+      log('[ChatService] Messages marked as read for room:', roomId)
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] markRead error:', errorMsg)
+      logError('[ChatService] markRead error:', errorMsg)
     }
   },
 
   /**
    * Assign admin ke chat room
    * @param roomId Room ID
-   * @param adminId Admin ID (text)
+   * @param adminId Admin ID (harus UUID yang valid)
    */
   async assignAdmin(roomId: string, adminId: string) {
     try {
-      if (!roomId || !adminId) return
+      if (!roomId || !adminId) {
+        console.warn('[ChatService] assignAdmin: roomId atau adminId kosong')
+        return
+      }
 
-      const { error } = await supabase
+      // Validasi adminId adalah UUID yang valid
+      if (!isValidUUID(adminId)) {
+        logError('[ChatService] assignAdmin: adminId bukan UUID yang valid:', adminId)
+        return
+      }
+
+      const { error } = await getClient()
         .from('chat_rooms')
         .update({
           assigned_admin: adminId,
@@ -240,14 +259,14 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error assigning admin:', errorMsg)
+        logError('[ChatService] Error assigning admin:', errorMsg)
         return
       }
 
-      console.log(`[ChatService] Admin ${adminId} assigned to room ${roomId}`)
+      log(`[ChatService] Admin ${adminId} assigned to room ${roomId}`)
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] assignAdmin error:', errorMsg)
+      logError('[ChatService] assignAdmin error:', errorMsg)
     }
   },
 
@@ -261,7 +280,7 @@ export const ChatService = {
     try {
       if (!roomId || !sender) return
 
-      const { error } = await supabase.from('chat_typing').upsert({
+      const { error } = await getClient().from('chat_typing').upsert({
         room_id: roomId,
         sender,
         typing,
@@ -269,14 +288,14 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error setting typing:', errorMsg)
+        logError('[ChatService] Error setting typing:', errorMsg)
         return
       }
 
-      console.log(`[ChatService] ${sender} typing: ${typing}`)
+      log(`[ChatService] ${sender} typing: ${typing}`)
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] setTyping error:', errorMsg)
+      logError('[ChatService] setTyping error:', errorMsg)
     }
   },
 
@@ -289,7 +308,7 @@ export const ChatService = {
     try {
       if (!roomId) return []
 
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('chat_messages')
         .select('*')
         .eq('room_id', roomId)
@@ -297,14 +316,14 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error fetching messages:', errorMsg)
+        logError('[ChatService] Error fetching messages:', errorMsg)
         return []
       }
 
       return data || []
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] getMessages error:', errorMsg)
+      logError('[ChatService] getMessages error:', errorMsg)
       return []
     }
   },
@@ -315,7 +334,7 @@ export const ChatService = {
    */
   async getAllRooms() {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('chat_rooms')
         .select('*')
         .eq('is_closed', false)
@@ -323,14 +342,14 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error fetching all rooms:', errorMsg)
+        logError('[ChatService] Error fetching all rooms:', errorMsg)
         return []
       }
 
       return data || []
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] getAllRooms error:', errorMsg)
+      logError('[ChatService] getAllRooms error:', errorMsg)
       return []
     }
   },
@@ -343,7 +362,7 @@ export const ChatService = {
     try {
       if (!roomId) return
 
-      const { error } = await supabase
+      const { error } = await getClient()
         .from('chat_rooms')
         .update({ 
           is_closed: true
@@ -352,14 +371,14 @@ export const ChatService = {
 
       if (error) {
         const errorMsg = formatError(error)
-        console.error('[ChatService] Error closing room:', errorMsg)
+        logError('[ChatService] Error closing room:', errorMsg)
         return
       }
 
-      console.log('[ChatService] Room closed:', roomId)
+      log('[ChatService] Room closed:', roomId)
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] closeRoom error:', errorMsg)
+      logError('[ChatService] closeRoom error:', errorMsg)
     }
   },
 
@@ -372,50 +391,28 @@ export const ChatService = {
     try {
       const now = new Date().toISOString()
 
-      // Coba update dulu
-      const { data: existingData, error: checkError } = await supabase
+      // Gunakan UPSERT untuk menghindari duplicate key error
+      const { error } = await getClient()
         .from('admin_status')
-        .select('id')
-        .eq('admin_id', adminId)
-        .single()
+        .upsert({
+          admin_id: adminId,
+          status: 'online',
+          last_activity: now,
+        }, {
+          onConflict: 'admin_id'
+        })
 
-      if (existingData) {
-        // Sudah ada, update saja
-        const { error } = await supabase
-          .from('admin_status')
-          .update({
-            status: 'online',
-            last_activity: now,
-          })
-          .eq('admin_id', adminId)
-
-        if (error) {
-          const errorMsg = formatError(error)
-          console.warn('[ChatService] Error updating admin online:', errorMsg)
-          return false
-        }
-      } else {
-        // Belum ada, insert baru
-        const { error } = await supabase
-          .from('admin_status')
-          .insert({
-            admin_id: adminId,
-            status: 'online',
-            last_activity: now,
-          })
-
-        if (error) {
-          const errorMsg = formatError(error)
-          console.warn('[ChatService] Error inserting admin online:', errorMsg)
-          return false
-        }
+      if (error) {
+        const errorMsg = formatError(error)
+        console.warn('[ChatService] Error updating admin online:', errorMsg)
+        return false
       }
 
-      console.log('[ChatService] Admin online status updated:', adminId)
+      log('[ChatService] Admin online status updated:', adminId)
       return true
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] setAdminOnline error:', errorMsg)
+      logError('[ChatService] setAdminOnline error:', errorMsg)
       return false
     }
   },
@@ -427,50 +424,28 @@ export const ChatService = {
    */
   async setAdminOffline(adminId: string) {
     try {
-      // Coba update dulu
-      const { data: existingData } = await supabase
+      // Gunakan UPSERT untuk konsistensi
+      const { error } = await getClient()
         .from('admin_status')
-        .select('id')
-        .eq('admin_id', adminId)
-        .single()
+        .upsert({
+          admin_id: adminId,
+          status: 'offline',
+          last_activity: new Date().toISOString(),
+        }, {
+          onConflict: 'admin_id'
+        })
 
-      if (existingData) {
-        // Update status ke offline
-        const { error } = await supabase
-          .from('admin_status')
-          .update({
-            status: 'offline',
-            last_activity: new Date().toISOString(),
-          })
-          .eq('admin_id', adminId)
-
-        if (error) {
-          const errorMsg = formatError(error)
-          console.warn('[ChatService] Error setting admin offline:', errorMsg)
-          return false
-        }
-      } else {
-        // Insert baru
-        const { error } = await supabase
-          .from('admin_status')
-          .insert({
-            admin_id: adminId,
-            status: 'offline',
-            last_activity: new Date().toISOString(),
-          })
-
-        if (error) {
-          const errorMsg = formatError(error)
-          console.warn('[ChatService] Error inserting admin offline:', errorMsg)
-          return false
-        }
+      if (error) {
+        const errorMsg = formatError(error)
+        console.warn('[ChatService] Error setting admin offline:', errorMsg)
+        return false
       }
 
-      console.log('[ChatService] Admin offline status updated:', adminId)
+      log('[ChatService] Admin offline status updated:', adminId)
       return true
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] setAdminOffline error:', errorMsg)
+      logError('[ChatService] setAdminOffline error:', errorMsg)
       return false
     }
   },
@@ -484,7 +459,7 @@ export const ChatService = {
     try {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
 
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('admin_status')
         .select('*')
         .eq('admin_id', adminId)
@@ -500,11 +475,11 @@ export const ChatService = {
       }
 
       const isOnline = !!data
-      console.log('[ChatService] Specific admin online status:', adminId, isOnline)
+      log('[ChatService] Specific admin online status:', adminId, isOnline)
       return isOnline
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] isSpecificAdminOnline error:', errorMsg)
+      logError('[ChatService] isSpecificAdminOnline error:', errorMsg)
       return false
     }
   },
@@ -517,7 +492,7 @@ export const ChatService = {
     try {
       const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString()
 
-      const { data, error } = await supabase
+      const { data, error } = await getClient()
         .from('admin_status')
         .select('id')
         .eq('status', 'online')
@@ -533,12 +508,12 @@ export const ChatService = {
       }
 
       const isOnline = data && data.length > 0
-      console.log('[ChatService] Any admin online status:', isOnline)
       return isOnline
     } catch (error) {
       const errorMsg = formatError(error)
-      console.error('[ChatService] isAdminOnline error:', errorMsg)
+      logError('[ChatService] isAdminOnline error:', errorMsg)
       return false
     }
   },
 }
+

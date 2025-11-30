@@ -5,8 +5,12 @@ import Image from 'next/image'
 import { X, Send } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChatService } from '@/lib/ChatService'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import type { Database } from '@/types/database.types'
+
+// Logging - disabled for clean production console
+const log = (...args: any[]) => {}  // Info logs disabled
+const logError = (...args: any[]) => {}  // Error logs disabled
 
 interface Message {
   id: string
@@ -16,6 +20,11 @@ interface Message {
   pending: boolean
   is_read: boolean
   created_at: string
+}
+
+// Helper: Get supabase client
+function getClient(): any {
+  return getBrowserSupabaseClient()
 }
 
 // Helper: Format waktu ke WIB (UTC+7)
@@ -56,8 +65,6 @@ const formatFullDateTime = (dateString: string): string => {
 }
 
 export default function FloatingChatButton() {
-  const supabase = createClientComponentClient<Database>()
-
   // State
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
@@ -104,24 +111,24 @@ export default function FloatingChatButton() {
 
     const initializeChat = async () => {
       try {
-        console.log('[FloatingChat] Initializing room for guest:', guestId)
+        log('[FloatingChat] Initializing room for guest:', guestId)
         const room = await ChatService.getRoom(guestId)
         if (room) {
           const roomId = room.id || room.room_id
           setRoomId(roomId)
-          console.log('[FloatingChat] Room initialized:', roomId)
+          log('[FloatingChat] Room initialized:', roomId)
 
           // Immediately load existing messages when room is initialized
           try {
             const msgs = await ChatService.getMessages(roomId)
-            console.log('[FloatingChat] Pre-loaded messages:', msgs.length)
+            log('[FloatingChat] Pre-loaded messages:', msgs.length)
             setMessages(msgs)
           } catch (err) {
-            console.error('[FloatingChat] Error pre-loading messages:', err)
+            logError('[FloatingChat] Error pre-loading messages:', err)
           }
         }
       } catch (error) {
-        console.error('[FloatingChat] Error initializing chat:', error)
+        logError('[FloatingChat] Error initializing chat:', error)
       }
     }
 
@@ -132,7 +139,7 @@ export default function FloatingChatButton() {
   useEffect(() => {
     if (!roomId) return
 
-    console.log('[FloatingChat] Setting up message listener for room:', roomId)
+    log('[FloatingChat] Setting up message listener for room:', roomId)
     let isSubscribed = true
 
     // First, fetch all existing messages
@@ -140,18 +147,18 @@ export default function FloatingChatButton() {
       try {
         const msgs = await ChatService.getMessages(roomId)
         if (isSubscribed) {
-          console.log('[FloatingChat] Loaded messages:', msgs.length)
+          log('[FloatingChat] Loaded messages:', msgs.length)
           setMessages(msgs)
         }
       } catch (err) {
-        console.error('[FloatingChat] Error loading messages:', err)
+        logError('[FloatingChat] Error loading messages:', err)
       }
     }
 
     loadMessages()
 
     // Then setup realtime listener - don't restart when isOpen changes!
-    const channel = supabase
+    const channel = getClient()
       .channel(`messages-${roomId}`)
       .on(
         'postgres_changes',
@@ -164,17 +171,17 @@ export default function FloatingChatButton() {
         (payload: any) => {
           if (!isSubscribed) return
 
-          console.log('[FloatingChat] Message event:', payload.eventType, payload.new)
+          log('[FloatingChat] Message event:', payload.eventType, payload.new)
 
           if (payload.eventType === 'INSERT') {
             // New message received
             setMessages((prev) => {
               // Check if message sudah ada (avoid duplicate)
               if (prev.some((m) => m.id === payload.new.id)) {
-                console.log('[FloatingChat] Skipping duplicate message:', payload.new.id)
+                log('[FloatingChat] Skipping duplicate message:', payload.new.id)
                 return prev
               }
-              console.log('[FloatingChat] Adding new message to UI:', payload.new.id)
+              log('[FloatingChat] Adding new message to UI:', payload.new.id)
               return [...prev, payload.new]
             })
 
@@ -194,32 +201,32 @@ export default function FloatingChatButton() {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[FloatingChat] Channel subscription status:', status)
+      .subscribe((status: any) => {
+        log('[FloatingChat] Channel subscription status:', status)
       })
 
     messageChannelRef.current = channel
 
     return () => {
       isSubscribed = false
-      supabase.removeChannel(channel)
+      getClient().removeChannel(channel)
     }
-  }, [roomId, supabase])
+  }, [roomId])
 
   // === MARK AS READ WHEN CHAT OPENS & REFRESH MESSAGES ===
   useEffect(() => {
     if (isOpen && roomId) {
-      console.log('[FloatingChat] Chat opened, marking messages as read and refreshing...')
+      log('[FloatingChat] Chat opened, marking messages as read and refreshing...')
       ChatService.markRead(roomId, 'guest')
       setUnreadCount(0)
 
       // Refresh messages saat chat dibuka untuk ensure messages up-to-date
       ChatService.getMessages(roomId)
         .then((msgs: Message[]) => {
-          console.log('[FloatingChat] Refreshed messages on open:', msgs.length)
+          log('[FloatingChat] Refreshed messages on open:', msgs.length)
           setMessages(msgs)
         })
-        .catch((err) => console.error('[FloatingChat] Error refreshing messages:', err))
+        .catch((err) => logError('[FloatingChat] Error refreshing messages:', err))
     }
   }, [isOpen, roomId])
 
@@ -227,9 +234,9 @@ export default function FloatingChatButton() {
   useEffect(() => {
     if (!roomId) return
 
-    console.log('[FloatingChat] Setting up typing listener for room:', roomId)
+    log('[FloatingChat] Setting up typing listener for room:', roomId)
 
-    const channel = supabase
+    const channel = getClient()
       .channel(`typing-${roomId}`)
       .on(
         'postgres_changes',
@@ -243,31 +250,33 @@ export default function FloatingChatButton() {
           // Jika admin yang ngetik
           if (payload.new.sender === 'admin') {
             setIsTyping(payload.new.typing)
-            console.log('[FloatingChat] Admin typing:', payload.new.typing)
+            log('[FloatingChat] Admin typing:', payload.new.typing)
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[FloatingChat] Typing channel subscription status:', status)
+      .subscribe((status: any) => {
+        log('[FloatingChat] Typing channel subscription status:', status)
       })
 
     typingChannelRef.current = channel
 
     return () => {
-      supabase.removeChannel(channel)
+      getClient().removeChannel(channel)
     }
   }, [roomId])
 
   // === LISTENER: ADMIN ONLINE STATUS ===
   useEffect(() => {
     let checkInterval: NodeJS.Timeout
+    let lastCheckTime = 0
+    const CHECK_THROTTLE_MS = 30000 // Check every 30 seconds instead of 3
 
     const checkAdminStatus = async () => {
       try {
         const isOnline = await ChatService.isAdminOnline()
         setAdminOnline(isOnline || false)
       } catch (error) {
-        console.error('[FloatingChat] Error checking admin status:', error)
+        logError('[FloatingChat] Error checking admin status:', error)
         setAdminOnline(false)
       }
     }
@@ -275,8 +284,8 @@ export default function FloatingChatButton() {
     // Check immediately
     checkAdminStatus()
 
-    // Check setiap 3 detik untuk realtime status
-    checkInterval = setInterval(checkAdminStatus, 3000)
+    // Check setiap 30 detik untuk realtime status (reduced frequency to prevent console spam)
+    checkInterval = setInterval(checkAdminStatus, CHECK_THROTTLE_MS)
 
     return () => {
       if (checkInterval) clearInterval(checkInterval)
@@ -287,21 +296,21 @@ export default function FloatingChatButton() {
   useEffect(() => {
     const handleVisibilityChange = () => {
       const isHidden = document.hidden
-      console.log('[FloatingChat] Tab visibility:', isHidden ? 'HIDDEN' : 'VISIBLE')
+      log('[FloatingChat] Tab visibility:', isHidden ? 'HIDDEN' : 'VISIBLE')
 
       // Jika ada message baru dan tab tersembunyi (guest ga liat)
       if (isHidden && messages.length > 0) {
         const lastMsg = messages[messages.length - 1]
         if (lastMsg.sender === 'admin' && !lastMsg.is_read) {
-          console.log('[FloatingChat] Playing notification sound...')
+          log('[FloatingChat] Playing notification sound...')
           // Play sound notification
           try {
             const audioUrl = new URL('/notify.mp3', window.location.origin).href
             const audio = new Audio(audioUrl)
             audio.volume = 0.5
-            audio.play().catch((err) => console.log('[FloatingChat] Audio play failed:', err))
+            audio.play().catch((err) => log('[FloatingChat] Audio play failed:', err))
           } catch (error) {
-            console.error('[FloatingChat] Notification error:', error)
+            logError('[FloatingChat] Notification error:', error)
           }
         }
       }
@@ -322,7 +331,7 @@ export default function FloatingChatButton() {
     setLoading(true)
 
     try {
-      console.log('[FloatingChat] Sending message to room:', roomId)
+      log('[FloatingChat] Sending message to room:', roomId)
 
       // Optimistic update - tambahkan pesan langsung ke UI dengan pending: false (delivered)
       const optimisticMessage: Message = {
@@ -345,13 +354,13 @@ export default function FloatingChatButton() {
       )
 
       if (error) {
-        console.error('[FloatingChat] Message send error:', error)
+        logError('[FloatingChat] Message send error:', error)
         // Rollback optimistic update
         setMessages((prev) => prev.filter((msg) => msg.id !== tempMessageId))
         const errorMsg = typeof error === 'string' ? error : JSON.stringify(error)
         alert('Error mengirim pesan: ' + errorMsg)
       } else {
-        console.log('[FloatingChat] Message sent successfully:', data?.id)
+        log('[FloatingChat] Message sent successfully:', data?.id)
 
         // Replace temp message dengan actual message dari DB (sudah delivered, pending: false)
         if (data?.id) {
@@ -368,7 +377,7 @@ export default function FloatingChatButton() {
         prev.filter((msg) => msg.id !== tempMessageId)
       )
       const errorMsg = error instanceof Error ? error.message : String(error)
-      console.error('[FloatingChat] Error sending message:', errorMsg)
+      logError('[FloatingChat] Error sending message:', errorMsg)
       alert('Gagal mengirim pesan: ' + errorMsg)
     } finally {
       setLoading(false)
@@ -655,3 +664,4 @@ export default function FloatingChatButton() {
     </div>
   )
 }
+

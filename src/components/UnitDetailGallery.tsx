@@ -65,7 +65,7 @@ export function UnitDetailGallery({
 
   if (images.length === 0) {
     return (
-      <div className="relative w-full h-96 bg-linear-to-br from-gold-50 to-gold-100 rounded-lg flex items-center justify-center">
+      <div className="relative w-full h-96 bg-gradient-to-br from-gold-50 to-gold-100 rounded-lg flex items-center justify-center">
         <p className="text-gray-400">Tidak ada gambar</p>
       </div>
     )
@@ -93,8 +93,10 @@ export function UnitDetailGallery({
               src={images[currentIndex]}
               alt={`${unitName} - ${currentIndex + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, 90vw"
               className="object-cover"
-              priority
+              priority={currentIndex === 0}
+              loading={currentIndex === 0 ? 'eager' : 'lazy'}
             />
           </motion.div>
         </AnimatePresence>
@@ -159,7 +161,9 @@ export function UnitDetailGallery({
                 src={image}
                 alt={`Thumbnail ${index + 1}`}
                 fill
+                sizes="80px"
                 className="object-cover"
+                priority={index === 0}
               />
               {currentIndex === index && (
                 <div className="absolute inset-0 bg-gold-600/20" />

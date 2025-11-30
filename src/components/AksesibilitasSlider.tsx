@@ -119,11 +119,12 @@ export function AksesibilitasSlider() {
 
         {/* Background Section - with Image */}
         <div className="mt-12 sm:mt-16 w-full relative rounded-lg overflow-hidden">
-          <div className="w-full aspect-4/3 sm:aspect-16/7 lg:aspect-21/7">
+          <div className="w-full aspect-4/3 sm:aspect-16/7 lg:aspect-21/7 relative">
             <Image
-              src="/image-new.jpg"
+              src="/image-new-min.jpg"
               alt="Aksesibilitas Background"
               fill
+              sizes="(max-width: 768px) 100vw, 90vw"
               className="object-cover"
               quality={85}
             />

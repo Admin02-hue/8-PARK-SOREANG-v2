@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { Button } from '@/components/Button'
 import toast from 'react-hot-toast'
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react'
@@ -23,7 +23,7 @@ export default function AdminLoginPage() {
     setError('')
 
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
 
       const { data, error: signInError } = await (supabase as any).auth.signInWithPassword({
         email,
@@ -71,6 +71,7 @@ export default function AdminLoginPage() {
                 src="/logo-login.png"
                 alt="8 Park Soreang Logo"
                 fill
+                sizes="200px"
                 className="object-contain"
                 priority
               />
@@ -144,7 +145,7 @@ export default function AdminLoginPage() {
               fullWidth
               size="lg"
               isLoading={loading}
-              className="group bg-linear-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700"
+              className="group bg-gradient-to-r from-gold-500 to-gold-600 hover:from-gold-600 hover:to-gold-700"
             >
               Masuk ke Dashboard
               <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />

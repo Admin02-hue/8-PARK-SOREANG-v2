@@ -4,7 +4,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Send, X, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { ChatService } from '@/lib/ChatService'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import { getOrCreateAdminUUID } from '@/lib/uuid-utils'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import type { Database } from '@/types/database.types'
 import { motion, AnimatePresence } from 'framer-motion'
 import { QuickReplyCards } from '@/components/QuickReplyCards'
@@ -80,7 +81,7 @@ interface ConversationUI {
 }
 
 export default function LiveChatPanel() {
-  const supabase = createClientComponentClient<Database>()
+  const supabase = getBrowserSupabaseClient()
 
   // State
   const [conversations, setConversations] = useState<ConversationUI[]>([])
@@ -88,7 +89,7 @@ export default function LiveChatPanel() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const [loadingChats, setLoadingChats] = useState(true)
-  const [adminId] = useState(() => localStorage.getItem('admin_id') || `admin-${Date.now()}`)
+  const [adminId] = useState(() => getOrCreateAdminUUID())
   const [adminOnline, setAdminOnline] = useState(true)
   const [guestTyping, setGuestTyping] = useState<{ [key: string]: boolean }>({})
 
@@ -329,7 +330,7 @@ export default function LiveChatPanel() {
           })
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('[LiveChat] Room channel subscription status:', status)
       })
 
@@ -399,7 +400,7 @@ export default function LiveChatPanel() {
           })
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('[LiveChat] Global message channel status:', status)
       })
 
@@ -523,7 +524,7 @@ export default function LiveChatPanel() {
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: any) => {
         console.log('[LiveChat] Selected room channel subscription status:', status)
       })
 

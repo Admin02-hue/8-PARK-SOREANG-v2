@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { submitLead } from '@/lib/actions'
 import toast from 'react-hot-toast'
@@ -88,12 +89,27 @@ export function RequestBrochureSection() {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
-      className="w-full py-2 sm:py-3 md:py-4 bg-linear-to-r from-gold-500 to-gold-600 bg-cover bg-center bg-no-repeat relative"
-      style={{
-        backgroundImage: 'url(/bg-permintaan-brosur.jpg)',
-      }}
+      className="relative w-full py-2 sm:py-3 md:py-4 bg-cover bg-center bg-no-repeat"
     >
-      <div className="max-w-5xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+      {/* Background Image */}
+      <Image
+        src="/bg-permintaan-brosur.jpg"
+        alt="Permintaan Brosur Background"
+        fill
+        quality={60}
+        sizes="100vw"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center',
+          zIndex: -1
+        }}
+      />
+      
+      {/* Gradient Overlay */}
+      <div className="absolute inset-0 bg-gradient-to-r from-gold-500/80 to-gold-600/80 z-0" />
+      
+      {/* Content */}
+      <div className="relative z-10 max-w-5xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
         {/* Header */}
         <motion.div
           initial={{ y: 20, opacity: 0 }}

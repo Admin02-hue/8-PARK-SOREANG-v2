@@ -6,11 +6,10 @@
 
 'use client'
 
-'use client'
-
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import type { Unit } from '@/types/database.types'
 import { UnitCard } from '@/components/UnitCard'
 import { Button } from '@/components/Button'
@@ -18,7 +17,6 @@ import { Filter, X } from 'lucide-react'
 
 export default function UnitsPage() {
   const [units, setUnits] = useState<Unit[]>([])
-  const [filteredUnits, setFilteredUnits] = useState<Unit[]>([])
   const [loading, setLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
 
@@ -32,12 +30,25 @@ export default function UnitsPage() {
   useEffect(() => {
     const fetchUnits = async () => {
       try {
-        const supabase = createBrowserSupabaseClient()
+        const supabase = getBrowserSupabaseClient()
         if (!supabase) {
           throw new Error('Supabase client tidak tersedia')
         }
         
         console.log('Fetching units from Supabase...')
+        const startTime = performance.now()
+        
+        // Test connection
+        const { data: testData, error: testError } = await supabase
+          .from('units')
+          .select('count', { count: 'exact', head: true })
+
+        if (testError) {
+          console.error('Supabase connection test failed:', testError)
+          throw testError
+        }
+
+        console.log('Supabase connection OK')
         
         const { data, error } = await supabase
           .from('units')
@@ -49,14 +60,12 @@ export default function UnitsPage() {
           throw error
         }
 
-        console.log('Units fetched:', data)
+        const loadTime = performance.now() - startTime
+        console.log(`Units fetched (${loadTime.toFixed(2)}ms):`, data?.length || 0, 'units')
         setUnits(data || [])
-        setFilteredUnits(data || [])
       } catch (error) {
         console.error('Error fetching units:', error)
-        // Set empty array so page doesn't get stuck
         setUnits([])
-        setFilteredUnits([])
       } finally {
         setLoading(false)
       }
@@ -65,9 +74,9 @@ export default function UnitsPage() {
     fetchUnits()
   }, [])
 
-  // Apply filters dan sorting
-  useEffect(() => {
-    let result = [...units]
+  // Optimize filters with useMemo
+  const filteredUnits = useMemo(() => {
+    let result = units
 
     // Filter by type
     if (selectedType) {
@@ -97,39 +106,51 @@ export default function UnitsPage() {
         break
     }
 
-    setFilteredUnits(result)
+    return result
   }, [units, selectedType, selectedStatus, priceRange, sortBy])
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setSelectedType('')
     setSelectedStatus('')
     setPriceRange([0, 10000000000])
     setSortBy('price-asc')
-  }
+  }, [])
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-600 py-16">
+      <div className="min-h-screen bg-gray-900 py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-gray-900 font-semibold">Loading unit...</p>
+          <p className="text-white font-semibold">Loading unit...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <main 
-      className="min-h-screen scroll-mt-16 relative bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/page-units-background.jpg')",
-        backgroundAttachment: 'fixed',
-      }}
-    >
+    <main className="min-h-screen scroll-mt-16 relative">
+      {/* Background Image */}
+      <Image
+        src="/page-units-background.jpg"
+        alt="Units Background"
+        fill
+        quality={60}
+        priority
+        sizes="100vw"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center',
+          zIndex: -2
+        }}
+      />
+
       {/* Overlay untuk kontras */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/20 z-0" />
+      
+      {/* Content */}
+      <div className="relative z-10">
       {/* Header */}
-      <section className="py-12 border-b border-gray-200 relative z-10 pt-28 bg-cover bg-center" style={{ backgroundImage: "url('/page-units-background.jpg')" }}>
-        <div className="absolute inset-0 bg-black/30" />
+      <section className="py-12 border-b border-gray-200 relative pt-28 bg-cover bg-center">
+        <div className="absolute inset-0 bg-black/30 z-0" />
         <div className="max-w-7xl mx-auto px-4 relative z-10">
           <h1 className="text-4xl font-bold text-white">Unit Tersedia</h1>
           <p className="mt-2 text-gray-200">
@@ -259,8 +280,8 @@ export default function UnitsPage() {
                   exit={{ opacity: 0 }}
                   className="grid grid-cols-1 md:grid-cols-2 gap-8"
                 >
-                  {filteredUnits.map((unit, index) => (
-                    <UnitCard key={unit.id} unit={unit} delay={index * 0.05} />
+                  {filteredUnits.map((unit) => (
+                    <UnitCard key={unit.id} unit={unit} />
                   ))}
                 </motion.div>
               ) : (
@@ -286,6 +307,7 @@ export default function UnitsPage() {
             </AnimatePresence>
           </div>
         </div>
+      </div>
       </div>
     </main>
   )

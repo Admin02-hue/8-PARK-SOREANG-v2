@@ -97,7 +97,7 @@ export function MobileMenu({ isOpen, onClose }: MobileMenuProps) {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.2, delay: 0.2 }}
-                  className="block m-3 px-6 py-3 rounded-lg bg-linear-to-r from-gold-500 to-gold-600 text-white text-center font-bold shadow-lg hover:shadow-xl transition text-sm"
+                  className="block m-3 px-6 py-3 rounded-lg bg-gradient-to-r from-gold-500 to-gold-600 text-white text-center font-bold shadow-lg hover:shadow-xl transition text-sm"
                 >
                   Hubungi Marketing
                 </motion.a>

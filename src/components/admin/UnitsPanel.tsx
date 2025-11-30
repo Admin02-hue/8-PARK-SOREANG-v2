@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { Button } from '@/components/Button'
 import { formatRupiah } from '@/lib/formatters'
 import { Plus, Edit2, Trash2, Search, X } from 'lucide-react'
@@ -51,7 +51,7 @@ export default function UnitsPanel() {
       if (isMounted) await fetchUnits()
 
       try {
-        const supabase = createBrowserSupabaseClient()
+        const supabase = getBrowserSupabaseClient()
         if (!supabase) return
 
         subscription = supabase
@@ -89,7 +89,7 @@ export default function UnitsPanel() {
   const fetchUnits = async () => {
     try {
       setLoading(true)
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       if (!supabase) throw new Error('Supabase client not initialized')
 
       const { data, error } = await (supabase as any)

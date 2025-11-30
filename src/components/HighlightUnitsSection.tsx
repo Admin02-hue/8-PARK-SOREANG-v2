@@ -6,6 +6,7 @@
  */
 
 import React from 'react'
+import Image from 'next/image'
 import { createServerSupabaseClientSimple } from '@/lib/supabase'
 import type { Unit } from '@/types/database.types'
 import { UnitCard } from './UnitCard'
@@ -73,13 +74,23 @@ export async function HighlightUnitsSection() {
     <section
       id="highlight-units"
       className="scroll-mt-16 py-20 sm:py-32 relative bg-cover bg-center"
-      style={{
-        backgroundImage: "url('/type-units-background.jpg')",
-        backgroundAttachment: 'fixed',
-      }}
     >
+      {/* Background Image */}
+      <Image
+        src="/type-units-background.jpg"
+        alt="Units Background"
+        fill
+        quality={60}
+        sizes="100vw"
+        style={{
+          objectFit: 'cover',
+          objectPosition: 'center',
+          zIndex: 0
+        }}
+      />
+
       {/* Overlay untuk kontras teks */}
-      <div className="absolute inset-0 bg-black/20" />
+      <div className="absolute inset-0 bg-black/20 z-0" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Section Header */}

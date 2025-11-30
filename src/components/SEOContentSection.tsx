@@ -20,7 +20,7 @@ export function SEOContentSection() {
           {/* Header - Clickable */}
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="w-full px-6 py-4 flex items-center justify-between bg-linear-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 transition-colors"
+            className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 transition-colors"
           >
             <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 text-left">
               Cluster Paling Strategis di Soreang — Akses 2 Menit ke Tol Soroja

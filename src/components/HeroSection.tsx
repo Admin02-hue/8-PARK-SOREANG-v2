@@ -1,18 +1,18 @@
 /**
- * Hero Section Component - REFACTORED (Enterprise Grade)
+ * Hero Section Component - OPTIMIZED (Enterprise Grade)
  * ========================================================
  * • Fully responsive tanpa cropping di semua ukuran layar
  * • Pattern responsive: mobile (100vh), tablet (80vh), desktop (70vh)
  * • Background Image dengan fill + object-cover
  * • Gradient overlay untuk readability
  * • Semua elemen centered vertical dan horizontal
- * • No fixed heights yang membuat crop
+ * • CSS animations untuk performa optimal (tidak block main thread)
+ * • Scroll indicator dengan CSS animation
  */
 
 'use client'
 
 import React from 'react'
-import { motion } from 'framer-motion'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ChevronDown, Phone } from 'lucide-react'
@@ -24,13 +24,14 @@ export function HeroSection() {
   }
 
   return (
-    <section className="relative w-full min-h-screen sm:min-h-[80vh] lg:min-h-[70vh] flex items-center justify-center overflow-hidden">
+    <section className="relative w-full min-h-screen sm:min-h-[80vh] lg:min-h-[70vh] flex items-center justify-center overflow-hidden animate-fadeIn">
       {/* Background Image - Full Coverage */}
       <div className="absolute inset-0 w-full h-full">
         <Image
           src="/hero-section.jpg"
           alt="8 Park Soreang Hero Background"
           fill
+          sizes="100vw"
           className="object-cover object-center"
           priority
           quality={90}
@@ -42,38 +43,31 @@ export function HeroSection() {
 
       {/* Content Wrapper - Centered with Flex */}
       <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        <motion.div
-          className="w-full max-w-md text-center flex flex-col items-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
+        <div
+          className="w-full max-w-md text-center flex flex-col items-center animate-fadeInUp"
+          style={{ animationDelay: '0.1s' }}
         >
           {/* Main Heading - SEO Optimized H1 */}
-          <motion.h1
-            className="mb-4 sm:mb-6 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-white"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
+          <h1
+            className="mb-4 sm:mb-6 text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-white animate-fadeInUp"
+            style={{ animationDelay: '0.2s' }}
           >
-            Cluster 8 Park Soreang — Perumahan Modern di Jantung Kabupaten Bandung
-          </motion.h1>
+            8 Park Soreang<br />
+            Exclusive Modern Residence
+          </h1>
 
           {/* Description - SEO Long-Tail Keywords */}
-          <motion.p
-            className="mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+          <p
+            className="mb-6 sm:mb-8 text-sm sm:text-base lg:text-lg text-gray-200 leading-relaxed animate-fadeInUp"
+            style={{ animationDelay: '0.3s' }}
           >
-            Cluster eksklusif di Soreang Bandung Selatan, hanya 2 menit dari Tol Soroja dan dekat Alun-Alun Soreang. Desain modern, legalitas aman, lingkungan premium dengan cicilan KPR ringan.
-          </motion.p>
+            Cluster prestisius dekat Tol Soroja dengan konsep hunian modern, akses strategis, dan lingkungan berkualitas tinggi. Hunian ideal bagi keluarga yang mencari kenyamanan dan nilai investasi terbaik di Bandung Selatan.
+          </p>
 
           {/* Badges - SEO Keywords Optimized */}
-          <motion.div
-            className="mb-6 sm:mb-8 flex flex-wrap justify-center gap-2 sm:gap-3"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
+          <div
+            className="mb-6 sm:mb-8 flex flex-wrap justify-center gap-2 sm:gap-3 animate-fadeInUp"
+            style={{ animationDelay: '0.4s' }}
           >
             <div 
               className="rounded-full bg-white/10 backdrop-blur-sm px-3 sm:px-4 py-1.5 sm:py-2 text-xs sm:text-sm font-medium text-white border border-white/20 hover:bg-white/20 transition-all"
@@ -93,14 +87,12 @@ export function HeroSection() {
             >
               ✓ Cicilan KPR Ringan
             </div>
-          </motion.div>
+          </div>
 
           {/* CTA Buttons - SEO Smart */}
-          <motion.div
-            className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5 }}
+          <div
+            className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto animate-fadeInUp"
+            style={{ animationDelay: '0.5s' }}
           >
             <Link href="/units" className="flex-1 sm:flex-none">
               <button 
@@ -122,21 +114,19 @@ export function HeroSection() {
                 Hubungi Marketing
               </button>
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
 
       {/* Scroll Indicator - Bottom Position */}
-      <motion.button
+      <button
         onClick={scrollToNext}
-        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 sm:gap-2"
-        animate={{ y: [0, 8, 0] }}
-        transition={{ duration: 2, repeat: Infinity }}
+        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 sm:gap-2 group"
         aria-label="Scroll to next section"
       >
         <p className="text-xs sm:text-sm text-gray-300">Scroll untuk lanjut</p>
-        <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400" />
-      </motion.button>
+        <ChevronDown className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400 animate-bounce" />
+      </button>
     </section>
   )
 }

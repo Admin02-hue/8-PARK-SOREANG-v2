@@ -28,7 +28,7 @@ const QuickReplyCard: React.FC<QuickReplyCardProps> = ({ message, onClick, isLoa
         backdropFilter: 'blur(10px)',
       }}
     >
-      <div className="absolute inset-0 bg-linear-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
       <div className="relative flex items-start gap-1.5">
         <MessageCircle className="w-3 h-3 mt-0.5 shrink-0 text-blue-400" />
         <span className="text-blue-100 group-hover:text-white transition-colors">{message}</span>
@@ -120,7 +120,7 @@ export const QuickReplyCards: React.FC<QuickReplyCardsProps> = ({ onSelectMessag
                   backdropFilter: 'blur(10px)',
                 }}
               >
-                <div className="absolute inset-0 bg-linear-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <div className="absolute inset-0 bg-gradient-to-r from-blue-500/0 via-blue-500/10 to-blue-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
                 <div className="relative flex items-start gap-0.5">
                   <MessageCircle className="w-2.5 h-2.5 mt-0.5 shrink-0 text-blue-400" />
                   <span className="text-blue-100 group-hover:text-white transition-colors line-clamp-2 text-xs">{message}</span>

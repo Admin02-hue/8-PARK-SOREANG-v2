@@ -5,6 +5,7 @@
  */
 
 import React from 'react'
+import Image from 'next/image'
 import { notFound } from 'next/navigation'
 import { createServerSupabaseClientSimple } from '@/lib/supabase'
 import type { Unit } from '@/types/database.types'
@@ -15,7 +16,7 @@ import {
   formatLuas,
 } from '@/lib/formatters'
 import { UnitDetailGallery } from '@/components/UnitDetailGallery'
-import { KPRSimulator } from '@/components/KPRSimulator'
+import { InteractiveHouseRotator } from '@/components/InteractiveHouseRotator'
 import { UnitCard } from '@/components/UnitCard'
 import { Button } from '@/components/Button'
 import Link from 'next/link'
@@ -187,7 +188,7 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
               <h2 className="text-2xl font-bold text-white mb-6">
                 Spesifikasi Teknis
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
                 {[
                   {
                     label: 'Luas Tanah',
@@ -198,12 +199,22 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
                     value: formatLuas(unit.luas_bangunan),
                   },
                   {
+                    label: 'Panjang',
+                    value: unit.blok === 'A' ? '13 m² s/d 18 m²' : '13 m²',
+                    description: 'Menampilkan Panjang Bangunan',
+                  },
+                  {
                     label: 'Blok',
                     value: unit.code,
                   },
                   {
                     label: 'Status',
                     value: unit.status.charAt(0).toUpperCase() + unit.status.slice(1),
+                  },
+                  {
+                    label: 'Lebar',
+                    value: unit.blok === 'A' ? '5 m²' : '5 m²',
+                    description: 'Menampilkan Lebar Bangunan',
                   },
                 ].map((spec, index) => (
                   <div
@@ -219,6 +230,25 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
                   </div>
                 ))}
               </div>
+
+              {/* Detail Spesifikasi dari Database */}
+              {unit.spesifikasi && typeof unit.spesifikasi === 'object' && Object.keys(unit.spesifikasi).length > 0 && (
+                <div className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-md p-6">
+                  <h3 className="text-lg font-semibold text-white mb-4">
+                    Detail Fasilitas
+                  </h3>
+                  <ul className="grid grid-cols-1 gap-2">
+                    {Object.entries(unit.spesifikasi).map(([key, value]) => (
+                      <li key={key} className="flex items-start gap-3">
+                        <span className="text-gold-400 mt-1">✓</span>
+                        <span className="text-white">
+                          {String(key)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
 
             {/* Fasilitas */}
@@ -276,7 +306,7 @@ export default async function UnitDetailPage({ params }: UnitDetailPageProps) {
 
               {/* KPR Simulator */}
               <div className="rounded-lg border border-white/20 bg-white/10 backdrop-blur-md p-6">
-                <KPRSimulator harga={unit.harga} />
+                <InteractiveHouseRotator blok={unit.blok} />
               </div>
             </div>
           </div>

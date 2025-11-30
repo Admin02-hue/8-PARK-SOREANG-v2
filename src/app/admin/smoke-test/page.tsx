@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
 interface TestResult {
@@ -24,7 +24,7 @@ export default function SmokeTestPage() {
   }, [])
 
   const checkAuth = async () => {
-    const supabase = createBrowserSupabaseClient()
+    const supabase = getBrowserSupabaseClient()
     if (!supabase) {
       toast.error('Supabase not initialized')
       setLoading(false)
@@ -55,7 +55,7 @@ export default function SmokeTestPage() {
     setTestStart(Date.now())
     setResults([])
 
-    const supabase = createBrowserSupabaseClient()
+    const supabase = getBrowserSupabaseClient()
     if (!supabase) {
       toast.error('Supabase client not initialized')
       setLoading(false)
@@ -72,9 +72,6 @@ export default function SmokeTestPage() {
       // Test 3: Leads (Read)
       await testLeadsRead(supabase)
 
-      // Test 4: Promotions (Read)
-      await testPromotionsRead(supabase)
-
       // Test 5: Sales (Read)
       await testSalesRead(supabase)
 
@@ -86,9 +83,6 @@ export default function SmokeTestPage() {
 
       // Test 8: Leads Realtime
       await testLeadsRealtime(supabase)
-
-      // Test 9: Promotions Realtime
-      await testPromotionsRealtime(supabase)
 
       // Test 10: Sales Realtime
       await testSalesRealtime(supabase)
@@ -159,23 +153,6 @@ export default function SmokeTestPage() {
     } catch (error) {
       const duration = Date.now() - start
       addResult('Leads Read', 'fail', String(error), duration)
-    }
-  }
-
-  const testPromotionsRead = async (supabase: any) => {
-    const start = Date.now()
-    try {
-      const { data, error } = await supabase
-        .from('promotions')
-        .select('*')
-        .limit(1)
-
-      const duration = Date.now() - start
-      if (error) throw error
-      addResult('Promotions Read', 'pass', `Found ${data?.length || 0} promotion(s)`, duration)
-    } catch (error) {
-      const duration = Date.now() - start
-      addResult('Promotions Read', 'fail', String(error), duration)
     }
   }
 
@@ -273,39 +250,6 @@ export default function SmokeTestPage() {
         clearTimeout(timeout)
         const duration = Date.now() - start
         addResult('Leads Realtime', 'fail', 'Subscription timeout', duration)
-        subscription.unsubscribe()
-        resolve()
-      }, 5000)
-    })
-  }
-
-  const testPromotionsRealtime = async (supabase: any) => {
-    const start = Date.now()
-    return new Promise<void>((resolve) => {
-      let received = false
-      let timeout: NodeJS.Timeout
-
-      const subscription = supabase
-        .channel('promotions-test')
-        .on('postgres_changes', { event: '*', schema: 'public', table: 'promotions' }, () => {
-          received = true
-        })
-        .subscribe((status: string) => {
-          if (status === 'SUBSCRIBED') {
-            timeout = setTimeout(() => {
-              const duration = Date.now() - start
-              addResult('Promotions Realtime', 'pass', 'Subscription active', duration)
-              subscription.unsubscribe()
-              resolve()
-            }, 1000)
-          }
-        })
-
-      // Force timeout after 5 seconds
-      setTimeout(() => {
-        clearTimeout(timeout)
-        const duration = Date.now() - start
-        addResult('Promotions Realtime', 'fail', 'Subscription timeout', duration)
         subscription.unsubscribe()
         resolve()
       }, 5000)

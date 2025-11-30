@@ -2,9 +2,9 @@
 
 import { Toaster } from 'react-hot-toast'
 import { Navbar } from '@/components/navbar/Navbar'
-import FloatingChatButton from '@/components/FloatingChatButton'
+import { DynamicFloatingChat } from '@/components/DynamicFloatingChat'
 import { usePathname } from 'next/navigation'
-import React from 'react'
+import React, { Suspense } from 'react'
 
 export default function LayoutClient({
   children,
@@ -17,7 +17,11 @@ export default function LayoutClient({
   return (
     <>
       {!isAdminPage && <Navbar />}
-      {!isAdminPage && <FloatingChatButton />}
+      {!isAdminPage && (
+        <Suspense fallback={null}>
+          <DynamicFloatingChat />
+        </Suspense>
+      )}
       <main className="pt-0">{children}</main>
       <Toaster
         position="bottom-right"

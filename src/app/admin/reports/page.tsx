@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { createBrowserSupabaseClient } from '@/lib/supabase'
+import { getBrowserSupabaseClient } from '@/lib/supabase'
 import { formatRupiah } from '@/lib/formatters'
 import { BarChart3, TrendingUp, Users, DollarSign, Calendar } from 'lucide-react'
 import type { Unit } from '@/types/database.types'
@@ -30,7 +30,7 @@ export default function AdminReportsPage() {
 
   const checkAuth = async () => {
     try {
-      const supabase = createBrowserSupabaseClient()
+      const supabase = getBrowserSupabaseClient()
       const { data: sessionData } = await (supabase as any).auth.getSession()
       
       if (!sessionData.session) {
@@ -62,49 +62,39 @@ export default function AdminReportsPage() {
 
   const fetchReports = async () => {
     try {
-      const supabase = createBrowserSupabaseClient()
+      setLoading(true)
+      
+      // Use API route instead of direct queries (bypasses RLS issues)
+      const response = await fetch('/api/admin/reports')
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.statusText}`)
+      }
 
-      // Fetch units
-      const { data: unitsData } = await (supabase as any)
-        .from('units')
-        .select('*')
+      const data = await response.json()
 
-      setUnits(unitsData || [])
-
-      // Fetch leads
-      const { count: leadsCount } = await (supabase as any)
-        .from('leads')
-        .select('*', { count: 'exact', head: true })
-
-      // Fetch sales
-      const { data: salesData, count: salesCount } = await (supabase as any)
-        .from('sales')
-        .select('*', { count: 'exact' })
-        .eq('status', 'completed')
+      const sales = data.sales || []
+      const leads = data.leads || []
+      const allUnits = data.allUnits || []
+      const events = data.events || []
 
       // Calculate stats
-      const totalRevenue = (salesData || []).reduce((sum: number, sale: any) => sum + (sale.sale_price || 0), 0)
-      const averageUnitPrice = unitsData && unitsData.length > 0
-        ? unitsData.reduce((sum: number, unit: Unit) => sum + unit.harga, 0) / unitsData.length
+      const totalRevenue = sales.reduce((sum: number, s: any) => sum + (s.sale_price || 0), 0)
+      const avgPrice = allUnits.length > 0
+        ? allUnits.reduce((sum: number, u: any) => sum + (u.harga || 0), 0) / allUnits.length
         : 0
 
-      // Fetch marketing events
-      const { count: viewsCount } = await (supabase as any)
-        .from('marketing_events')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_type', 'unit_view')
-
-      const conversionRate = leadsCount && leadsCount > 0 
-        ? ((salesCount || 0) / leadsCount * 100)
+      const conversionRate = leads.length > 0
+        ? (sales.length / leads.length) * 100
         : 0
 
       setStats({
-        totalUnitViews: viewsCount || 0,
-        totalLeads: leadsCount || 0,
-        totalSales: salesCount || 0,
+        totalUnitViews: events.length || 0,
+        totalLeads: leads.length || 0,
+        totalSales: sales.length || 0,
         totalRevenue,
         conversionRate: Math.round(conversionRate * 100) / 100,
-        averageUnitPrice: Math.round(averageUnitPrice),
+        averageUnitPrice: Math.round(avgPrice),
       })
     } catch (error) {
       console.error('Error fetching reports:', error)
@@ -115,7 +105,7 @@ export default function AdminReportsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-900 to-slate-800 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-gold-500"></div>
           <p className="mt-4 text-gray-300">Memuat laporan...</p>
@@ -125,7 +115,7 @@ export default function AdminReportsPage() {
   }
 
   return (
-    <main className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-slate-900">
+    <main className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
       {/* Header */}
       <header className="bg-white/10 backdrop-blur-md border-b border-white/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -158,7 +148,7 @@ export default function AdminReportsPage() {
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {/* Total Views */}
-          <div className="bg-linear-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-blue-500/20 to-blue-600/20 backdrop-blur-md border border-blue-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-blue-200">Total Views</p>
               <BarChart3 className="w-5 h-5 text-blue-400" />
@@ -168,7 +158,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Total Leads */}
-          <div className="bg-linear-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-purple-500/20 to-purple-600/20 backdrop-blur-md border border-purple-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-purple-200">Total Leads</p>
               <Users className="w-5 h-5 text-purple-400" />
@@ -178,7 +168,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Total Sales */}
-          <div className="bg-linear-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 backdrop-blur-md border border-emerald-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-emerald-200">Total Penjualan</p>
               <TrendingUp className="w-5 h-5 text-emerald-400" />
@@ -188,7 +178,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Total Revenue */}
-          <div className="bg-linear-to-br from-gold-500/20 to-gold-600/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-gold-500/20 to-gold-600/20 backdrop-blur-md border border-gold-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-gold-200">Total Revenue</p>
               <DollarSign className="w-5 h-5 text-gold-400" />
@@ -198,7 +188,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Conversion Rate */}
-          <div className="bg-linear-to-br from-cyan-500/20 to-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-cyan-500/20 to-cyan-600/20 backdrop-blur-md border border-cyan-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-cyan-200">Conversion Rate</p>
               <TrendingUp className="w-5 h-5 text-cyan-400" />
@@ -208,7 +198,7 @@ export default function AdminReportsPage() {
           </div>
 
           {/* Average Price */}
-          <div className="bg-linear-to-br from-pink-500/20 to-pink-600/20 backdrop-blur-md border border-pink-500/30 rounded-xl p-6">
+          <div className="bg-gradient-to-br from-pink-500/20 to-pink-600/20 backdrop-blur-md border border-pink-500/30 rounded-xl p-6">
             <div className="flex items-center justify-between mb-2">
               <p className="text-sm font-medium text-pink-200">Harga Rata-rata</p>
               <DollarSign className="w-5 h-5 text-pink-400" />
